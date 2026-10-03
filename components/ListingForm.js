@@ -32,7 +32,7 @@ export function ListingForm({ categories }) {
           <select
             name="categoryId"
             required
-            className="w-full rounded-xl border border-forest/15 bg-white px-3 py-2"
+            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -46,7 +46,7 @@ export function ListingForm({ categories }) {
           <select
             name="location"
             required
-            className="w-full rounded-xl border border-forest/15 bg-white px-3 py-2"
+            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
             {LOCATIONS.map((location) => (
               <option key={location} value={location}>
@@ -59,7 +59,7 @@ export function ListingForm({ categories }) {
           <select
             name="condition"
             required
-            className="w-full rounded-xl border border-forest/15 bg-white px-3 py-2"
+            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
             {CONDITIONS.map((condition) => (
               <option key={condition} value={condition}>
@@ -72,7 +72,7 @@ export function ListingForm({ categories }) {
           <select
             name="durationHours"
             defaultValue="72"
-            className="w-full rounded-xl border border-forest/15 bg-white px-3 py-2"
+            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
             <option value="24">24 hours</option>
             <option value="48">48 hours</option>
@@ -113,7 +113,7 @@ export function ListingForm({ categories }) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-forest px-6 py-3 text-sm font-semibold text-paper disabled:opacity-60 sm:w-auto"
+        className="w-full rounded-full bg-forest px-6 py-3 text-sm font-semibold text-on disabled:opacity-60 sm:w-auto"
       >
         {pending ? "Publishing lot..." : "Publish auction"}
       </button>
@@ -124,7 +124,7 @@ export function ListingForm({ categories }) {
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-medium text-forest-deep">{label}</span>
+      <span className="text-sm font-medium text-heading">{label}</span>
       {children}
     </label>
   );
@@ -164,7 +164,7 @@ function PhotoPicker() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-forest-deep">
+        <span className="text-sm font-medium text-heading">
           Lot photographs
         </span>
         <button
@@ -221,7 +221,7 @@ function PhotoPicker() {
                 <button
                   type="button"
                   onClick={() => sync(files.filter((_, item) => item !== index))}
-                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-forest-deep text-xs text-paper"
+                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-forest-deep text-xs text-on"
                   aria-label={`Remove ${files[index]?.name || `photo ${index + 1}`}`}
                 >
                   ×

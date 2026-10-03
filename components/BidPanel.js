@@ -2,22 +2,30 @@
 
 import { useActionState } from "react";
 import { placeBidAction } from "@/app/actions/bids";
-import { formatETB } from "@/lib/format";
+import { formatDate, formatETB } from "@/lib/format";
 
 export function BidPanel({ listing, user, minimum }) {
   const [state, action, pending] = useActionState(placeBidAction, {});
 
+  if (listing.computedStatus === "SCHEDULED") {
+    return (
+      <div className="panel rounded-[1.6rem] p-5 text-sm text-muted">
+        Bidding opens {formatDate(listing.startsAt)}.
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="panel rounded-[1.6rem] p-5">
-        <p className="display text-2xl text-forest-deep">Registered bidding</p>
+        <p className="display text-2xl text-heading">Registered bidding</p>
         <p className="mt-2 text-sm leading-6 text-muted">
           Sign in to place a bid on this lot. Buyers remain bound by the
           conditions of sale once a bid is accepted.
         </p>
         <a
           href={`/login?next=/auctions/${listing.id}`}
-          className="mt-4 inline-block rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-paper"
+          className="mt-4 inline-block rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-on"
         >
           Sign in to bid
         </a>
@@ -35,7 +43,7 @@ export function BidPanel({ listing, user, minimum }) {
 
   if (listing.computedStatus === "SOLD") {
     return (
-      <div className="rounded-[1.6rem] border border-orange/25 bg-paper p-5 text-sm text-forest-deep">
+      <div className="rounded-[1.6rem] border border-orange/25 bg-paper p-5 text-sm text-heading">
         This lot has been sold
         {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""}.
       </div>

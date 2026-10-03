@@ -23,13 +23,13 @@ export function PaymentForm({ listing, defaultName = "" }) {
         <p className="text-xs uppercase tracking-[0.18em] text-gold">
           Amount due
         </p>
-        <p className="display mt-1 text-3xl text-forest-deep">
+        <p className="display mt-1 text-3xl text-heading">
           {formatETB(listing.currentBid)}
         </p>
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-forest-deep">
+        <legend className="text-sm font-medium text-heading">
           Payment method
         </legend>
         <div className="grid gap-2 sm:grid-cols-3">
@@ -40,8 +40,8 @@ export function PaymentForm({ listing, defaultName = "" }) {
               onClick={() => setMethod(option.id)}
               className={`rounded-xl border px-3 py-2 text-sm ${
                 method === option.id
-                  ? "border-gold bg-gold-soft/50 text-forest-deep"
-                  : "border-forest/15 bg-white text-forest"
+                  ? "border-gold bg-gold-soft/50 text-heading"
+                  : "border-forest/15 bg-field text-forest"
               }`}
             >
               {option.label}
@@ -51,7 +51,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
       </fieldset>
 
       <label className="block space-y-2">
-        <span className="text-sm font-medium text-forest-deep">
+        <span className="text-sm font-medium text-heading">
           Account / card name
         </span>
         <input
@@ -65,7 +65,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
       {method === "CARD" ? (
         <>
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-forest-deep">
+            <span className="text-sm font-medium text-heading">
               Card number
             </span>
             <input
@@ -79,7 +79,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-forest-deep">
+              <span className="text-sm font-medium text-heading">
                 Expiry (MM/YY)
               </span>
               <input
@@ -90,7 +90,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
               />
             </label>
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-forest-deep">CVV</span>
+              <span className="text-sm font-medium text-heading">CVV</span>
               <input
                 name="cvv"
                 required
@@ -103,7 +103,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
         </>
       ) : (
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-forest-deep">
+          <span className="text-sm font-medium text-heading">
             Mobile number
           </span>
           <input
@@ -126,7 +126,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-paper disabled:opacity-60"
+        className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-on disabled:opacity-60"
       >
         {pending ? "Recording payment..." : `Pay ${formatETB(listing.currentBid)}`}
       </button>

@@ -22,7 +22,7 @@ export default async function SellPage() {
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Consignment
       </p>
-      <h1 className="display page-title mt-2 text-forest-deep">Sell a lot</h1>
+      <h1 className="display page-title mt-2 text-heading">Sell a lot</h1>
       <p className="mt-3 text-sm text-muted sm:text-base">
         Publish a timed auction. Buyers will see the lot immediately and can
         bid until the clock ends.

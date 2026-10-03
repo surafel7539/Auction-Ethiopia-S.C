@@ -1,7 +1,7 @@
 import { LOCATIONS, SORT_OPTIONS, STATUS_OPTIONS } from "@/lib/constants";
 
 const field =
-  "rounded-2xl border border-forest/10 bg-white px-3 py-2.5 text-sm outline-none";
+  "rounded-2xl border border-forest/10 bg-field px-3 py-2.5 text-sm outline-none";
 
 export function FilterBar({
   categories = [],
@@ -69,7 +69,7 @@ export function FilterBar({
       </select>
       <button
         type="submit"
-        className="rounded-2xl bg-blue px-4 py-2.5 text-sm font-semibold text-paper hover:bg-blue/90 sm:col-span-2"
+        className="rounded-2xl bg-blue px-4 py-2.5 text-sm font-semibold text-on hover:bg-blue/90 sm:col-span-2"
       >
         Apply filters
       </button>

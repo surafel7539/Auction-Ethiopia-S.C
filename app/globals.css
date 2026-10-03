@@ -4,6 +4,9 @@
   --background: #f4f1fb;
   --foreground: #1e3a8a;
   --ink: #1e3a8a;
+  --heading: #2e1065;
+  --on: #fffcf5;
+  --field: #ffffff;
   --forest: #6d28d9;
   --forest-deep: #2e1065;
   --gold: #eab308;
@@ -19,10 +22,33 @@
   --lime: #84cc16;
 }
 
-@theme inline {
+html.dark {
+  color-scheme: dark;
+  --background: #100818;
+  --foreground: #efeaff;
+  --ink: #efeaff;
+  --heading: #f6f3ff;
+  --field: #2a1844;
+  --paper: #1b1030;
+  --muted: #c9c1db;
+  --gold-soft: #3d3212;
+  --forest: #8b5cf6;
+  --blue: #7cb0ff;
+  --yellow: #facc15;
+  --gold: #facc15;
+  --orange: #fb923c;
+  --clay: #fb923c;
+  --green: #4ade80;
+  --lime: #c6f15a;
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-ink: var(--ink);
+  --color-heading: var(--heading);
+  --color-on: var(--on);
+  --color-field: var(--field);
   --color-forest: var(--forest);
   --color-forest-deep: var(--forest-deep);
   --color-gold: var(--gold);
@@ -60,14 +86,21 @@ body {
   overflow-x: hidden;
 }
 
+html.dark body {
+  background:
+    radial-gradient(ellipse 70% 40% at 0% -10%, rgba(139, 92, 246, 0.22), transparent 50%),
+    radial-gradient(ellipse 45% 30% at 100% 0%, rgba(198, 241, 90, 0.08), transparent 46%),
+    #100818;
+}
+
 .flag-bar {
   height: 3px;
   background: linear-gradient(90deg, #6d28d9, #2563eb 45%, #eab308 72%, #16a34a);
 }
 
 .panel {
-  background: rgba(255, 252, 245, 0.86);
-  border: 1px solid rgba(109, 40, 217, 0.1);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--forest) 18%, transparent);
   box-shadow: 0 24px 50px -32px rgba(46, 16, 101, 0.45);
   backdrop-filter: blur(16px);
 }
@@ -108,10 +141,16 @@ button {
 input,
 select,
 textarea {
+  background: var(--field);
   color: var(--ink);
 }
 
 ::selection {
   background: #ddd6fe;
   color: #2e1065;
+}
+
+html.dark ::selection {
+  background: #6d28d9;
+  color: #fffcf5;
 }

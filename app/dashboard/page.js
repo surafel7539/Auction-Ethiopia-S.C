@@ -28,7 +28,7 @@ export default async function DashboardPage() {
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Client desk
       </p>
-      <h1 className="display page-title mt-2 text-forest-deep">
+      <h1 className="display page-title mt-2 text-heading">
         Welcome, {user.legalName.split(" ")[0]}
       </h1>
       <p className="mt-3 text-muted">
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href="/sell"
-          className="rounded-full bg-forest px-5 py-2 text-sm text-paper"
+          className="rounded-full bg-forest px-5 py-2 text-sm text-on"
         >
           Create a listing
         </Link>
@@ -52,11 +52,11 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-12">
-        <h2 className="display section-title text-forest-deep">My listings</h2>
+        <h2 className="display section-title text-heading">My listings</h2>
         {listings.length ? (
           <div className="panel mt-5 overflow-x-auto rounded-[1.6rem]">
             <table className="w-full min-w-[520px] text-left text-sm">
-              <thead className="bg-forest text-gold-soft">
+              <thead className="bg-forest text-on">
                 <tr>
                   <th className="px-4 py-3">Lot</th>
                   <th className="px-4 py-3">Bid</th>
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                       <td className="px-4 py-3">
                         <Link
                           href={`/auctions/${listing.id}`}
-                          className="font-medium text-forest-deep"
+                          className="font-medium text-heading"
                         >
                           {listing.title}
                         </Link>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-12">
-        <h2 className="display section-title text-forest-deep">My bids</h2>
+        <h2 className="display section-title text-heading">My bids</h2>
         {uniqueBids.length ? (
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {uniqueBids.map((bid) => (
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-12">
-        <h2 className="display section-title text-forest-deep">Watchlist</h2>
+        <h2 className="display section-title text-heading">Watchlist</h2>
         {watches.length ? (
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {watches.map((watch) => (

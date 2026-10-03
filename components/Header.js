@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { BrandMark } from "@/components/BrandMark";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const links = [
   { href: "/auctions", label: "Auctions" },
   { href: "/categories", label: "Categories" },
   { href: "/sell", label: "Sell a lot" },
-  { href: "/help", label: "How it works" },
 ];
 
 export function Header() {
@@ -43,7 +43,7 @@ export function Header() {
           <Link href="/" className="flex min-w-0 items-center gap-2.5">
             <BrandMark className="h-10 w-10" />
             <span className="min-w-0 leading-tight">
-              <span className="block truncate display text-lg text-forest-deep">
+              <span className="block truncate display text-lg text-heading">
                 Auction Ethiopia
               </span>
               <span className="block text-[10px] uppercase tracking-[0.2em] text-yellow">
@@ -69,7 +69,7 @@ export function Header() {
               type="search"
               name="q"
               placeholder="Search lots"
-              className="w-full rounded-full border border-forest/10 bg-white/80 px-4 py-2 text-sm outline-none"
+              className="w-full rounded-full border border-forest/10 bg-field/80 px-4 py-2 text-sm outline-none"
             />
           </form>
 
@@ -87,7 +87,7 @@ export function Header() {
                 <form action={logoutAction}>
                   <button
                     type="submit"
-                    className="rounded-full bg-orange px-3.5 py-2 text-paper hover:bg-orange/90"
+                    className="rounded-full bg-orange px-3.5 py-2 text-on hover:bg-orange/90"
                   >
                     Sign out
                   </button>
@@ -103,12 +103,13 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-forest px-4 py-2 font-semibold text-paper hover:bg-forest-deep"
+                  className="rounded-full bg-forest px-4 py-2 font-semibold text-on hover:bg-forest-deep"
                 >
                   Join
                 </Link>
               </>
             )}
+            <ThemeToggle />
             <button
               type="button"
               className="grid h-11 w-11 place-items-center rounded-full border border-forest/15 text-forest lg:hidden"
@@ -129,7 +130,7 @@ export function Header() {
               type="search"
               name="q"
               placeholder="Search lots"
-              className="w-full rounded-full border border-forest/15 bg-white px-4 py-2 text-sm outline-none"
+              className="w-full rounded-full border border-forest/15 bg-field px-4 py-2 text-sm outline-none"
             />
           </form>
           <nav className="flex flex-col gap-1 text-base font-medium text-blue">

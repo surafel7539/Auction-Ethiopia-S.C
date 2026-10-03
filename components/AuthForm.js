@@ -18,7 +18,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
         <p className="text-xs uppercase tracking-[0.22em] text-gold">
           Auction Ethiopia S.C
         </p>
-        <h1 className="display mt-2 text-3xl text-forest-deep">
+        <h1 className="display mt-2 text-3xl text-heading">
           {mode === "register" ? "Open an account" : "Client sign in"}
         </h1>
         <p className="mt-2 text-sm text-muted">
@@ -48,7 +48,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
           <select
             name="role"
             defaultValue="BOTH"
-            className="w-full rounded-xl border border-forest/15 bg-white px-3 py-2 text-lg"
+            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2 text-lg"
           >
             <option value="BUYER">Buyer</option>
             <option value="SELLER">Seller</option>
@@ -74,7 +74,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-paper disabled:opacity-60"
+        className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-on disabled:opacity-60"
       >
         {pending
           ? "Please wait..."
@@ -102,7 +102,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
       </p>
 
       {mode === "login" ? (
-        <p className="rounded-xl bg-gold-soft/40 px-3 py-2 text-xs text-forest-deep">
+        <p className="rounded-xl bg-gold-soft/40 px-3 py-2 text-xs text-heading">
           Demo buyer licence: AE-BUY-001 / Demo1234!
         </p>
       ) : null}

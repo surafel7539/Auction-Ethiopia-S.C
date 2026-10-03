@@ -39,7 +39,7 @@ export default async function CategoryPage({ params, searchParams }) {
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Department
       </p>
-      <h1 className="display page-title mt-2 text-forest-deep">
+      <h1 className="display page-title mt-2 text-heading">
         {meta.icon || ""} {category.name}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">{category.description}</p>

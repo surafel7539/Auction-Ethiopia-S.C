@@ -612,6 +612,108 @@ async function main() {
       category: createdCategories.electronics._id,
       seller: seller._id,
     },
+    {
+      title: "2022 Toyota Corolla Cross",
+      description:
+        "Scheduled lot. Compact crossover with one owner and a full service file. Viewing opens with the auction in Addis Ababa.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 1450000,
+      currentBid: 1450000,
+      bidIncrement: 25000,
+      condition: "Excellent",
+      location: "Addis Ababa",
+      startsAt: hours(36),
+      endsAt: hours(108),
+      category: createdCategories.vehicles._id,
+      seller: seller._id,
+    },
+    {
+      title: "22k Gold Bracelet",
+      description:
+        "Scheduled lot. Hand-finished 22-karat gold bracelet, hallmarked, offered as a single piece from Gondar.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 72000,
+      currentBid: 72000,
+      bidIncrement: 2000,
+      condition: "Like New",
+      location: "Gondar",
+      startsAt: hours(18),
+      endsAt: hours(90),
+      category: createdCategories.jewelry._id,
+      seller: both._id,
+    },
+    {
+      title: "Bole Commercial Floor",
+      description:
+        "Scheduled lot. Open-plan commercial floor near Bole Road, about 210 sqm, with parking. Title review begins when the auction opens.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 8900000,
+      currentBid: 8900000,
+      bidIncrement: 100000,
+      condition: "Good",
+      location: "Addis Ababa",
+      startsAt: hours(72),
+      endsAt: hours(168),
+      category: createdCategories["real-estate"]._id,
+      seller: seller._id,
+    },
+    {
+      title: "Coffee Pulper, Station Size",
+      description:
+        "Scheduled lot. Washed-process pulper from a Hawassa station, recently serviced. Collection after the hammer.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 260000,
+      currentBid: 260000,
+      bidIncrement: 5000,
+      condition: "Good",
+      location: "Hawassa",
+      startsAt: hours(48),
+      endsAt: hours(120),
+      category: createdCategories.agriculture._id,
+      seller: both._id,
+    },
+    {
+      title: "Vintage Medium-Format Camera",
+      description:
+        "Scheduled lot. Working medium-format camera with two lenses, from a private Addis collection. Inspection on the opening day.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 34000,
+      currentBid: 34000,
+      bidIncrement: 1000,
+      condition: "Excellent",
+      location: "Addis Ababa",
+      startsAt: hours(12),
+      endsAt: hours(84),
+      category: createdCategories.collectibles._id,
+      seller: seller._id,
+    },
+    {
+      title: "Site Generator, 100kVA",
+      description:
+        "Scheduled lot. Containerised 100kVA generator with a transfer switch, stored in Adama. The lot opens for bidding on the published date.",
+      images: JSON.stringify([
+        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1600&q=80",
+      ]),
+      startingBid: 980000,
+      currentBid: 980000,
+      bidIncrement: 20000,
+      condition: "Good",
+      location: "Adama",
+      startsAt: hours(60),
+      endsAt: hours(132),
+      category: createdCategories.industrial._id,
+      seller: both._id,
+    },
   ];
 
   for (const listing of listings) {

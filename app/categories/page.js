@@ -30,7 +30,7 @@ export default async function CategoriesPage() {
               style={{ borderLeftWidth: 6, borderLeftColor: meta.accent || "#6d28d9" }}
             >
               <span className="text-3xl">{meta.icon || "◆"}</span>
-              <h2 className="display mt-4 text-2xl text-forest-deep sm:text-3xl">
+              <h2 className="display mt-4 text-2xl text-heading sm:text-3xl">
                 {category.name}
               </h2>
               <p className="mt-3 text-sm text-muted sm:text-base">{category.description}</p>

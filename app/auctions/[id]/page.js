@@ -78,7 +78,7 @@ export default async function ListingPage({ params, searchParams }) {
           <ListingGallery images={images} title={listing.title} />
 
           <div className="mt-8 space-y-4">
-            <h2 className="display section-title text-forest-deep">Lot notes</h2>
+            <h2 className="display section-title text-heading">Lot notes</h2>
             <p className="whitespace-pre-wrap text-sm leading-7 text-muted sm:text-base sm:leading-8">
               {listing.description}
             </p>
@@ -91,12 +91,12 @@ export default async function ListingPage({ params, searchParams }) {
               <span
                 className={`rounded-full px-3 py-1 text-xs uppercase tracking-wide ${
                   listing.computedStatus === "LIVE"
-                    ? "bg-green text-paper"
+                    ? "bg-green text-on"
                     : listing.computedStatus === "SOLD"
                       ? "bg-yellow text-forest-deep"
                       : listing.computedStatus === "ENDED"
-                        ? "bg-ink text-paper"
-                        : "bg-forest text-paper"
+                        ? "bg-forest-deep text-on"
+                        : "bg-forest text-on"
                 }`}
               >
                 {statusLabel(listing.computedStatus)}
@@ -105,7 +105,7 @@ export default async function ListingPage({ params, searchParams }) {
                 <WatchButton listingId={listing.id} watching={watching} />
               ) : null}
             </div>
-            <h1 className="display section-title mt-4 text-forest-deep">
+            <h1 className="display section-title mt-4 text-heading">
               {listing.title}
             </h1>
             <p className="mt-2 text-sm text-muted">
@@ -120,12 +120,16 @@ export default async function ListingPage({ params, searchParams }) {
                 tone="text-blue"
               />
               <Stat
-                label="Time remaining"
+                label={listing.computedStatus === "SCHEDULED" ? "Opens" : "Time remaining"}
                 value={
-                  <Countdown
-                    endsAt={effectiveEndsAt(listing)}
-                    className="text-orange"
-                  />
+                  listing.computedStatus === "SCHEDULED" ? (
+                    formatDate(listing.startsAt)
+                  ) : (
+                    <Countdown
+                      endsAt={effectiveEndsAt(listing)}
+                      className="text-orange"
+                    />
+                  )
                 }
                 tone="text-orange"
               />
@@ -149,13 +153,13 @@ export default async function ListingPage({ params, searchParams }) {
             )}
 
             {query?.paid === "1" ? (
-              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-forest-deep">
+              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
                 Payment recorded. This lot is now sold.
               </p>
             ) : null}
 
             {listing.computedStatus === "SOLD" ? (
-              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-forest-deep">
+              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
                 Sold
                 {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""} at{" "}
                 {`${formatETB(listing.paidAmount || listing.currentBid)}.`}
@@ -163,12 +167,15 @@ export default async function ListingPage({ params, searchParams }) {
             ) : null}
 
             {winner ? (
-              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-forest-deep">
+              <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
                 Hammered to {winner.name} at {formatETB(highest.amount)}.
               </p>
             ) : null}
 
             <p className="mt-4 text-xs text-muted">
+              {listing.computedStatus === "SCHEDULED"
+                ? `Bidding opens ${formatDate(listing.startsAt)}. `
+                : ""}
               Closes {formatDate(effectiveEndsAt(listing))}
               {listing.bidCount
                 ? ". A new bid resets a 2-hour window; if nobody bids, the last bid wins."
@@ -184,23 +191,20 @@ export default async function ListingPage({ params, searchParams }) {
 
           {showBuy ? (
             <div className="rounded-2xl border border-orange/30 bg-paper p-4">
-              <p className="text-sm text-forest-deep">
+              <p className="text-sm text-heading">
                 You won this lot. Pay the house to settle the hammer price.
               </p>
               <Link
                 href={`/auctions/${listing.id}/pay`}
-                className="mt-3 block rounded-2xl bg-orange px-5 py-4 text-center text-sm font-semibold text-paper"
+                className="mt-3 block rounded-2xl bg-orange px-5 py-4 text-center text-sm font-semibold text-on"
               >
                 Pay {formatETB(listing.currentBid)} to settle
-              </Link>
-              <Link href="/help" className="mt-3 block text-center text-xs text-blue">
-                How winning and payment work
               </Link>
             </div>
           ) : null}
 
           <div className="panel rounded-[1.8rem] p-6">
-            <h2 className="display text-2xl text-forest-deep">Bid history</h2>
+            <h2 className="display text-2xl text-heading">Bid history</h2>
             {listing.bids.length ? (
               <ul className="mt-4 space-y-3">
                 {listing.bids.map((bid) => (
@@ -226,7 +230,7 @@ export default async function ListingPage({ params, searchParams }) {
 
       {related.length ? (
         <section className="mt-16">
-          <h2 className="display section-title text-forest-deep">
+          <h2 className="display section-title text-heading">
             More in {listing.category.name}
           </h2>
           <div className="mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3">

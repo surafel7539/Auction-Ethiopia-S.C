@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PaymentForm } from "@/components/PaymentForm";
 import { getCurrentUser } from "@/lib/auth";
@@ -34,16 +33,12 @@ export default async function PayListingPage({ params }) {
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Settlement
       </p>
-      <h1 className="display page-title mt-2 text-forest-deep">
+      <h1 className="display page-title mt-2 text-heading">
         Pay for this lot
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
         The winning bidder pays the house after the lot closes. A live lot
-        cannot be bought early.{" "}
-        <Link href="/help" className="font-medium text-blue">
-          Read the help desk
-        </Link>
-        .
+        cannot be bought early.
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -64,7 +59,7 @@ export default async function PayListingPage({ params }) {
             <p className="text-[11px] uppercase tracking-[0.18em] text-gold">
               {listing.category?.name} · {listing.location}
             </p>
-            <h2 className="display text-2xl text-forest-deep">{listing.title}</h2>
+            <h2 className="display text-2xl text-heading">{listing.title}</h2>
             <p className="text-sm text-muted">
               {listing.condition} · Consigned by {listing.seller.name}
             </p>
@@ -76,7 +71,7 @@ export default async function PayListingPage({ params }) {
 
         <div className="card-shadow rounded-3xl border border-forest/10 bg-paper p-5 sm:p-8">
           {listing.computedStatus === "SOLD" ? (
-            <p className="text-sm text-forest-deep">
+            <p className="text-sm text-heading">
               This lot is already sold
               {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""}.
             </p>

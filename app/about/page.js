@@ -8,7 +8,7 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">The house</p>
-      <h1 className="display page-title mt-2 text-forest-deep">
+      <h1 className="display page-title mt-2 text-heading">
         About Auction Ethiopia S.C
       </h1>
       <div className="mt-6 space-y-5 text-base leading-7 text-muted sm:text-lg sm:leading-8">

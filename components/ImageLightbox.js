@@ -82,7 +82,7 @@ export function ImageLightbox({
         onClick={(event) => event.stopPropagation()}
       />
       {images.length > 1 ? (
-        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-paper/90 px-3 py-1 text-xs text-forest-deep">
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-paper/90 px-3 py-1 text-xs text-heading">
           {index + 1} / {images.length}
         </p>
       ) : null}
