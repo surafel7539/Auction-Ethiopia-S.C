@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
-import { connectDB } from "@/lib/db";
-import { Listing, Watch } from "@/lib/models";
+import { deleteWatch, findWatch, insertWatch } from "@/lib/models";
 import { isValidId } from "@/lib/serialize";
 
 export async function toggleWatchAction(listingId) {
@@ -15,15 +14,12 @@ export async function toggleWatchAction(listingId) {
     return { error: "Invalid listing." };
   }
 
-  await connectDB();
-  const existing = await Watch.findOne({ user: user.id, listing: listingId });
+  const existing = await findWatch(user.id, listingId);
 
   if (existing) {
-    await existing.deleteOne();
-    await Listing.findByIdAndUpdate(listingId, { $inc: { watchCount: -1 } });
+    await deleteWatch(user.id, listingId);
   } else {
-    await Watch.create({ user: user.id, listing: listingId });
-    await Listing.findByIdAndUpdate(listingId, { $inc: { watchCount: 1 } });
+    await insertWatch(user.id, listingId);
   }
 
   revalidatePath(`/auctions/${listingId}`);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatETB, parseImages, statusLabel } from "@/lib/format";
+import { effectiveEndsAt, formatETB, parseImages, statusLabel } from "@/lib/format";
 import { Countdown } from "./Countdown";
 
 export function ListingCard({ listing }) {
@@ -25,19 +25,19 @@ export function ListingCard({ listing }) {
           <span
             className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
               status === "LIVE"
-                ? "bg-forest text-gold-soft"
+                ? "bg-green text-paper"
                 : status === "ENDED"
                   ? "bg-ink/80 text-white"
                   : status === "SOLD"
-                    ? "bg-gold text-ink"
-                    : "bg-gold text-ink"
+                    ? "bg-yellow text-forest-deep"
+                    : "bg-orange text-paper"
             }`}
           >
             {statusLabel(status)}
           </span>
         </div>
         <div className="space-y-3 p-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-gold">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-yellow">
             {listing.category?.name} · {listing.location}
           </p>
           <h3 className="display text-lg leading-snug text-forest-deep sm:text-xl">
@@ -46,13 +46,13 @@ export function ListingCard({ listing }) {
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-xs text-muted">Current bid</p>
-              <p className="text-lg font-semibold text-ink">
+              <p className="text-lg font-semibold text-blue">
                 {formatETB(listing.currentBid)}
               </p>
             </div>
             <div className="text-right text-sm text-muted">
               <p>{listing._count?.bids || 0} bids</p>
-              <Countdown endsAt={listing.endsAt} className="font-medium text-clay" />
+              <Countdown endsAt={effectiveEndsAt(listing)} className="font-semibold text-orange" />
             </div>
           </div>
         </div>

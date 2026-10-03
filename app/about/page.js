@@ -18,9 +18,9 @@ export default function AboutPage() {
         </p>
         <p>
           Sales are timed and incremental. Each bid is attributed to a
-          registered client. When the clock ends, the highest bidder is
-          recorded against the lot. Sellers keep control of starting prices,
-          increments, reserves, and photographs.
+          registered client. If two hours pass after the last bid, or the
+          scheduled close arrives first, that last bid wins. Sellers keep
+          control of starting prices, increments, reserves, and photographs.
         </p>
         <p>
           Head office is on Bole Road, Addis Ababa, with lots offered from

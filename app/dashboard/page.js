@@ -115,15 +115,6 @@ export default async function DashboardPage() {
                       ? " · leading"
                       : " · outbid"}
                 </p>
-                {bid.listing.computedStatus === "LIVE" &&
-                bid.listing.sellerId !== user.id ? (
-                  <Link
-                    href={`/auctions/${bid.listing.id}/pay`}
-                    className="mt-2 inline-block text-sm font-medium text-forest"
-                  >
-                    Buy this lot
-                  </Link>
-                ) : null}
                 {bid.listing.computedStatus === "ENDED" &&
                 bid.amount >= bid.listing.currentBid ? (
                   <Link

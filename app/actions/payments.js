@@ -3,9 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { connectDB } from "@/lib/db";
 import { getAuctionStatus } from "@/lib/format";
-import { Bid, Listing, Payment } from "@/lib/models";
+import {
+  findHighestBid,
+  findListingById,
+  insertPayment,
+  markListingSold,
+} from "@/lib/models";
 import { isValidId } from "@/lib/serialize";
 
 const METHODS = {
@@ -65,12 +69,11 @@ export async function payListingAction(_, formData) {
     }
   }
 
-  await connectDB();
-  const listing = await Listing.findById(listingId);
+  const listing = await findListingById(listingId);
   if (!listing) {
     return { error: "This lot could not be found." };
   }
-  if (String(listing.seller) === user.id) {
+  if (String(listing.sellerId) === user.id) {
     return { error: "You cannot buy your own consignment." };
   }
 
@@ -81,15 +84,15 @@ export async function payListingAction(_, formData) {
   if (status === "CANCELLED") {
     return { error: "This lot is no longer for sale." };
   }
-  if (status === "ENDED") {
-    const highest = await Bid.findOne({ listing: listingId })
-      .sort({ amount: -1 })
-      .lean();
-    if (!highest || String(highest.bidder) !== user.id) {
-      return { error: "Only the winning bidder can settle this lot." };
-    }
-  } else if (status !== "LIVE") {
-    return { error: "This lot cannot be purchased right now." };
+  if (status !== "ENDED") {
+    return {
+      error: "This lot is still open. The last bidder pays after it closes.",
+    };
+  }
+
+  const highest = await findHighestBid(listingId);
+  if (!highest || String(highest.bidder?.id) !== user.id) {
+    return { error: "Only the winning bidder can settle this lot." };
   }
 
   const amount = Number(listing.currentBid || listing.startingBid);
@@ -97,37 +100,26 @@ export async function payListingAction(_, formData) {
     return { error: "This lot does not have a payable amount." };
   }
 
-  const updated = await Listing.findOneAndUpdate(
-    {
-      _id: listingId,
-      seller: { $ne: user.id },
-      status: { $nin: ["CANCELLED", "SOLD"] },
-    },
-    {
-      $set: {
-        status: "SOLD",
-        buyer: user.id,
-        paidAt: new Date(),
-        paidAmount: amount,
-        paymentMethod: method,
-      },
-    },
-    { new: true },
-  );
+  const updated = await markListingSold({
+    listingId,
+    userId: user.id,
+    amount,
+    paymentMethod: method,
+  });
 
   if (!updated) {
     return { error: "This lot was sold just now. Refresh and try another lot." };
   }
 
-  await Payment.create({
+  await insertPayment({
     amount,
     method,
     reference: `AE-${Date.now().toString(36).toUpperCase()}`,
     payerName,
     payerPhone: method === "CARD" ? "" : payerPhone,
     last4: method === "CARD" ? cardNumber.slice(-4) : "",
-    listing: listingId,
-    buyer: user.id,
+    listingId,
+    buyerId: user.id,
   });
 
   revalidatePath(`/auctions/${listingId}`);

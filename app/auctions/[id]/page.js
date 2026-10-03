@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   formatDate,
   formatETB,
+  effectiveEndsAt,
   getNextMinBid,
   parseImages,
   statusLabel,
@@ -51,12 +52,9 @@ export default async function ListingPage({ params, searchParams }) {
   const winner =
     listing.computedStatus === "ENDED" && highest ? highest.bidder : null;
   const showBuy =
-    listing.computedStatus !== "SOLD" &&
-    listing.computedStatus !== "CANCELLED" &&
+    listing.computedStatus === "ENDED" &&
     user?.id !== listing.sellerId &&
-    (listing.computedStatus === "LIVE" ||
-      (listing.computedStatus === "ENDED" &&
-        highest?.bidder?.id === user?.id));
+    highest?.bidder?.id === user?.id;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
@@ -88,7 +86,17 @@ export default async function ListingPage({ params, searchParams }) {
         <aside className="space-y-5">
           <div className="card-shadow rounded-3xl border border-forest/10 bg-paper p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="rounded-full bg-forest px-3 py-1 text-xs uppercase tracking-wide text-gold-soft">
+              <span
+                className={`rounded-full px-3 py-1 text-xs uppercase tracking-wide ${
+                  listing.computedStatus === "LIVE"
+                    ? "bg-green text-paper"
+                    : listing.computedStatus === "SOLD"
+                      ? "bg-yellow text-forest-deep"
+                      : listing.computedStatus === "ENDED"
+                        ? "bg-ink text-paper"
+                        : "bg-forest text-paper"
+                }`}
+              >
                 {statusLabel(listing.computedStatus)}
               </span>
               {user ? (
@@ -104,15 +112,26 @@ export default async function ListingPage({ params, searchParams }) {
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <Stat label="Current bid" value={formatETB(listing.currentBid)} />
+              <Stat
+                label="Current bid"
+                value={formatETB(listing.currentBid)}
+                tone="text-blue"
+              />
               <Stat
                 label="Time remaining"
-                value={<Countdown endsAt={listing.endsAt} />}
+                value={
+                  <Countdown
+                    endsAt={effectiveEndsAt(listing)}
+                    className="text-orange"
+                  />
+                }
+                tone="text-orange"
               />
               <Stat label="Bids" value={String(listing._count.bids)} />
               <Stat
                 label="Increment"
                 value={formatETB(listing.bidIncrement)}
+                tone="text-green"
               />
             </div>
 
@@ -148,7 +167,10 @@ export default async function ListingPage({ params, searchParams }) {
             ) : null}
 
             <p className="mt-4 text-xs text-muted">
-              Closes {formatDate(listing.endsAt)}
+              Closes {formatDate(effectiveEndsAt(listing))}
+              {listing.bidCount
+                ? ". A new bid resets a 2-hour window; if nobody bids, the last bid wins."
+                : "."}
             </p>
           </div>
 
@@ -159,14 +181,20 @@ export default async function ListingPage({ params, searchParams }) {
           />
 
           {showBuy ? (
-            <Link
-              href={user ? `/auctions/${listing.id}/pay` : `/login?next=/auctions/${listing.id}/pay`}
-              className="block rounded-2xl bg-forest px-5 py-4 text-center text-sm font-semibold text-paper"
-            >
-              {listing.computedStatus === "ENDED"
-                ? `Pay ${formatETB(listing.currentBid)} to settle`
-                : `Buy now for ${formatETB(listing.currentBid)}`}
-            </Link>
+            <div className="rounded-2xl border border-orange/30 bg-paper p-4">
+              <p className="text-sm text-forest-deep">
+                You won this lot. Pay the house to settle the hammer price.
+              </p>
+              <Link
+                href={`/auctions/${listing.id}/pay`}
+                className="mt-3 block rounded-2xl bg-orange px-5 py-4 text-center text-sm font-semibold text-paper"
+              >
+                Pay {formatETB(listing.currentBid)} to settle
+              </Link>
+              <Link href="/help" className="mt-3 block text-center text-xs text-blue">
+                How winning and payment work
+              </Link>
+            </div>
           ) : null}
 
           <div className="rounded-3xl border border-forest/10 bg-paper p-6">
@@ -179,7 +207,7 @@ export default async function ListingPage({ params, searchParams }) {
                     className="flex items-center justify-between text-sm"
                   >
                     <span>{bid.bidder.name}</span>
-                    <span className="font-medium">
+                    <span className="font-medium text-blue">
                       {formatETB(bid.amount)}
                     </span>
                   </li>
@@ -210,11 +238,11 @@ export default async function ListingPage({ params, searchParams }) {
   );
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, tone = "text-ink" }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-gold">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-ink">{value}</p>
+      <p className="text-xs uppercase tracking-wide text-yellow">{label}</p>
+      <p className={`mt-1 text-lg font-semibold ${tone}`}>{value}</p>
     </div>
   );
 }

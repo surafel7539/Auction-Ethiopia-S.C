@@ -1,8 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { connectDB } from "@/lib/db";
-import { User } from "@/lib/models";
+import {
+  createUser,
+  findUserByLicence,
+  findUserByLicenceOrPhone,
+} from "@/lib/models";
 import { toUserDTO } from "@/lib/serialize";
 import {
   createSession,
@@ -47,10 +50,7 @@ export async function registerAction(_, formData) {
     return { error: "Please choose a valid account type." };
   }
 
-  await connectDB();
-  const existing = await User.findOne({
-    $or: [{ licenceNumber }, { phone }],
-  });
+  const existing = await findUserByLicenceOrPhone(licenceNumber, phone);
   if (existing?.licenceNumber === licenceNumber) {
     return { error: "An account with this licence number already exists." };
   }
@@ -58,7 +58,7 @@ export async function registerAction(_, formData) {
     return { error: "An account with this phone number already exists." };
   }
 
-  const user = await User.create({
+  const user = await createUser({
     legalName,
     licenceNumber,
     phone,
@@ -75,8 +75,7 @@ export async function loginAction(_, formData) {
   const password = String(formData.get("password") || "");
   const next = clean(formData.get("next")) || "/dashboard";
 
-  await connectDB();
-  const user = await User.findOne({ licenceNumber });
+  const user = await findUserByLicence(licenceNumber);
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return { error: "Invalid licence number or password." };
   }

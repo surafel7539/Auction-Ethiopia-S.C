@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PaymentForm } from "@/components/PaymentForm";
 import { getCurrentUser } from "@/lib/auth";
@@ -35,8 +36,12 @@ export default async function PayListingPage({ params }) {
         Pay for this lot
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
-        Complete payment to the house. Live lots can be bought at the current
-        bid. Ended lots can be settled by the winning bidder.
+        The winning bidder pays the house after the lot closes. A live lot
+        cannot be bought early.{" "}
+        <Link href="/help" className="font-medium text-blue">
+          Read the help desk
+        </Link>
+        .
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">

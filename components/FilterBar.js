@@ -82,7 +82,7 @@ export function FilterBar({
       </select>
       <button
         type="submit"
-        className="rounded-xl bg-forest px-4 py-2 text-sm font-medium text-paper hover:bg-forest-deep sm:col-span-2"
+        className="rounded-xl bg-blue px-4 py-2 text-sm font-medium text-paper hover:bg-blue/90 sm:col-span-2"
       >
         Apply filters
       </button>

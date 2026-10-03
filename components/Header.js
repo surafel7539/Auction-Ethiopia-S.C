@@ -9,7 +9,7 @@ const links = [
   { href: "/auctions", label: "Auctions" },
   { href: "/categories", label: "Categories" },
   { href: "/sell", label: "Sell a lot" },
-  { href: "/how-it-works", label: "How it works" },
+  { href: "/help", label: "How it works" },
 ];
 
 export function Header({ user }) {
@@ -25,15 +25,15 @@ export function Header({ user }) {
             <span className="block truncate display text-lg text-forest-deep sm:text-xl">
               Auction Ethiopia
             </span>
-            <span className="block text-[10px] uppercase tracking-[0.18em] text-gold sm:text-[11px] sm:tracking-[0.22em]">
+            <span className="block text-[10px] uppercase tracking-[0.18em] text-yellow sm:text-[11px] sm:tracking-[0.22em]">
               Share Company
             </span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 text-sm font-medium text-forest lg:flex">
+        <nav className="hidden items-center gap-5 text-sm font-medium text-blue lg:flex">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-gold">
+            <Link key={link.href} href={link.href} className="hover:text-orange">
               {link.label}
             </Link>
           ))}
@@ -53,14 +53,14 @@ export function Header({ user }) {
             <>
               <Link
                 href="/dashboard"
-                className="hidden text-forest hover:text-gold sm:inline"
+                className="hidden text-blue hover:text-orange sm:inline"
               >
                 {user.name.split(" ")[0]}
               </Link>
               <form action={logoutAction}>
                 <button
                   type="submit"
-                  className="rounded-full border border-forest/20 px-3 py-1.5 text-forest hover:bg-forest hover:text-paper"
+                  className="rounded-full border border-orange/40 px-3 py-1.5 text-orange hover:bg-orange hover:text-paper"
                 >
                   Sign out
                 </button>
@@ -70,7 +70,7 @@ export function Header({ user }) {
             <>
               <Link
                 href="/login"
-                className="hidden text-forest hover:text-gold sm:inline"
+                className="hidden text-blue hover:text-orange sm:inline"
               >
                 Sign in
               </Link>
@@ -104,7 +104,7 @@ export function Header({ user }) {
               className="w-full rounded-full border border-forest/15 bg-white px-4 py-2 text-sm outline-none"
             />
           </form>
-          <nav className="flex flex-col gap-3 text-base font-medium text-forest">
+          <nav className="flex flex-col gap-3 text-base font-medium text-blue">
             {links.map((link) => (
               <Link
                 key={link.href}

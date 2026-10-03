@@ -9,7 +9,7 @@ export function BidPanel({ listing, user, minimum }) {
 
   if (!user) {
     return (
-      <div className="rounded-2xl border border-gold/40 bg-gold-soft/30 p-5">
+      <div className="rounded-2xl border border-forest/15 bg-paper p-5">
         <p className="display text-2xl text-forest-deep">Registered bidding</p>
         <p className="mt-2 text-sm text-muted">
           Sign in to place a bid on this lot. Buyers remain bound by the
@@ -35,7 +35,7 @@ export function BidPanel({ listing, user, minimum }) {
 
   if (listing.computedStatus === "SOLD") {
     return (
-      <div className="rounded-2xl border border-gold/40 bg-gold-soft/30 p-5 text-sm text-forest-deep">
+      <div className="rounded-2xl border border-orange/25 bg-paper p-5 text-sm text-forest-deep">
         This lot has been sold
         {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""}.
       </div>
@@ -84,7 +84,7 @@ export function BidPanel({ listing, user, minimum }) {
         <p className="mt-3 text-sm text-clay">{state.error}</p>
       ) : null}
       {state?.ok ? (
-        <p className="mt-3 text-sm text-forest">Your bid has been placed.</p>
+        <p className="mt-3 text-sm text-green">Your bid has been placed.</p>
       ) : null}
     </form>
   );

@@ -6,8 +6,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser, canSell } from "@/lib/auth";
 import { CONDITIONS, LOCATIONS } from "@/lib/constants";
-import { connectDB } from "@/lib/db";
-import { Bid, Category, Listing } from "@/lib/models";
+import {
+  cancelListing,
+  countBids,
+  createListing,
+  findCategoryById,
+  findListingById,
+} from "@/lib/models";
 import { isValidId } from "@/lib/serialize";
 
 function clean(value) {
@@ -89,13 +94,12 @@ export async function createListingAction(_, formData) {
     return { error: "Add at least one photograph of the lot." };
   }
 
-  await connectDB();
-  const category = await Category.findById(categoryId);
+  const category = await findCategoryById(categoryId);
   if (!category) {
     return { error: "That category does not exist." };
   }
 
-  const listing = await Listing.create({
+  const listing = await createListing({
     title,
     description,
     images: JSON.stringify(images),
@@ -107,14 +111,14 @@ export async function createListingAction(_, formData) {
     location,
     status: "LIVE",
     endsAt: new Date(Date.now() + durationHours * 60 * 60 * 1000),
-    category: categoryId,
-    seller: user.id,
+    categoryId,
+    sellerId: user.id,
   });
 
   revalidatePath("/auctions");
   revalidatePath("/categories");
   revalidatePath("/");
-  redirect(`/auctions/${listing._id}`);
+  redirect(`/auctions/${listing.id}`);
 }
 
 export async function cancelListingAction(listingId) {
@@ -122,9 +126,8 @@ export async function cancelListingAction(listingId) {
   if (!user) return { error: "Please sign in." };
   if (!isValidId(listingId)) return { error: "Invalid listing." };
 
-  await connectDB();
-  const listing = await Listing.findById(listingId);
-  if (!listing || String(listing.seller) !== user.id) {
+  const listing = await findListingById(listingId);
+  if (!listing || String(listing.sellerId) !== user.id) {
     return { error: "You can only cancel your own listings." };
   }
 
@@ -132,13 +135,12 @@ export async function cancelListingAction(listingId) {
     return { error: "A sold lot cannot be cancelled." };
   }
 
-  const bidCount = await Bid.countDocuments({ listing: listingId });
+  const bidCount = await countBids(listingId);
   if (bidCount > 0) {
     return { error: "A listing with bids cannot be cancelled." };
   }
 
-  listing.status = "CANCELLED";
-  await listing.save();
+  await cancelListing(listingId);
 
   revalidatePath("/dashboard");
   revalidatePath(`/auctions/${listingId}`);
