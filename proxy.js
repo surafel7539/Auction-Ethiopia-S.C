@@ -3,7 +3,7 @@ import { jwtVerify } from "jose";
 
 const protectedPaths = ["/sell", "/dashboard"];
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
   const needsAuth = protectedPaths.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
