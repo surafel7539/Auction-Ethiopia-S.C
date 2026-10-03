@@ -3,14 +3,16 @@
 import { useActionState, useState } from "react";
 import { payListingAction } from "@/app/actions/payments";
 import { formatETB } from "@/lib/format";
+import { useI18n } from "@/components/LocaleProvider";
 
 const METHODS = [
   { id: "TELEBIRR", label: "Telebirr" },
   { id: "CBE_BIRR", label: "CBE Birr" },
-  { id: "CARD", label: "Visa / Mastercard" },
+  { id: "CARD", key: "visa" },
 ];
 
 export function PaymentForm({ listing, defaultName = "" }) {
+  const { locale, t } = useI18n();
   const [method, setMethod] = useState("TELEBIRR");
   const [state, action, pending] = useActionState(payListingAction, {});
 
@@ -21,16 +23,16 @@ export function PaymentForm({ listing, defaultName = "" }) {
 
       <div>
         <p className="text-xs uppercase tracking-[0.18em] text-gold">
-          Amount due
+          {t("amountDue")}
         </p>
         <p className="display mt-1 text-3xl text-heading">
-          {formatETB(listing.currentBid)}
+          {formatETB(listing.currentBid, locale)}
         </p>
       </div>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium text-heading">
-          Payment method
+          {t("paymentMethod")}
         </legend>
         <div className="grid gap-2 sm:grid-cols-3">
           {METHODS.map((option) => (
@@ -44,7 +46,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
                   : "border-forest/15 bg-field text-forest"
               }`}
             >
-              {option.label}
+              {option.key ? t(option.key) : option.label}
             </button>
           ))}
         </div>
@@ -52,7 +54,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
 
       <label className="block space-y-2">
         <span className="text-sm font-medium text-heading">
-          Account / card name
+          {t("accountName")}
         </span>
         <input
           name="payerName"
@@ -66,7 +68,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
         <>
           <label className="block space-y-2">
             <span className="text-sm font-medium text-heading">
-              Card number
+              {t("cardNumber")}
             </span>
             <input
               name="cardNumber"
@@ -80,7 +82,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block space-y-2">
               <span className="text-sm font-medium text-heading">
-                Expiry (MM/YY)
+                {t("expiry")}
               </span>
               <input
                 name="expiry"
@@ -104,7 +106,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
       ) : (
         <label className="block space-y-2">
           <span className="text-sm font-medium text-heading">
-            Mobile number
+            {t("mobileNumber")}
           </span>
           <input
             name="payerPhone"
@@ -119,8 +121,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
       {state?.error ? <p className="text-sm text-clay">{state.error}</p> : null}
 
       <p className="text-xs text-muted">
-        Settlement is recorded by Auction Ethiopia S.C. Use demo details here;
-        no live bank charge is sent.
+        {t("settlementNote")}
       </p>
 
       <button
@@ -128,7 +129,7 @@ export function PaymentForm({ listing, defaultName = "" }) {
         disabled={pending}
         className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-on disabled:opacity-60"
       >
-        {pending ? "Recording payment..." : `Pay ${formatETB(listing.currentBid)}`}
+        {pending ? t("recordingPayment") : t("payAmount", { amount: formatETB(listing.currentBid, locale) })}
       </button>
     </form>
   );

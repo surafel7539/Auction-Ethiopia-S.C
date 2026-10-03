@@ -4,45 +4,48 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { createListingAction } from "@/app/actions/listings";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { CONDITIONS, LOCATIONS } from "@/lib/constants";
+import { useI18n } from "@/components/LocaleProvider";
+import { categoryName, cityName, conditionName } from "@/lib/messages";
 
 export function ListingForm({ categories }) {
+  const { locale, t } = useI18n();
   const [state, action, pending] = useActionState(createListingAction, {});
 
   return (
     <form action={action} className="space-y-5">
-      <Field label="Lot title">
+      <Field label={t("lotTitle")}>
         <input
           name="title"
           required
-          placeholder="e.g. 2019 Toyota Hilux Double Cab"
+          placeholder={t("titlePlaceholder")}
           className="w-full rounded-xl border border-forest/15 px-3 py-2"
         />
       </Field>
-      <Field label="Description">
+      <Field label={t("description")}>
         <textarea
           name="description"
           required
           rows={6}
-          placeholder="Condition, history, inspection notes, and what is included in the sale."
+          placeholder={t("descriptionPlaceholder")}
           className="w-full rounded-xl border border-forest/15 px-3 py-2"
         />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Category">
+        <Field label={t("category")}>
           <select
             name="categoryId"
             required
             className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
-            <option value="">Select a category</option>
+            <option value="">{t("selectCategory")}</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.name}
+                {categoryName(locale, category)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="City">
+        <Field label={t("city")}>
           <select
             name="location"
             required
@@ -50,12 +53,12 @@ export function ListingForm({ categories }) {
           >
             {LOCATIONS.map((location) => (
               <option key={location} value={location}>
-                {location}
+                {cityName(locale, location)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Condition">
+        <Field label={t("condition")}>
           <select
             name="condition"
             required
@@ -63,25 +66,25 @@ export function ListingForm({ categories }) {
           >
             {CONDITIONS.map((condition) => (
               <option key={condition} value={condition}>
-                {condition}
+                {conditionName(locale, condition)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Auction length">
+        <Field label={t("auctionLength")}>
           <select
             name="durationHours"
             defaultValue="72"
             className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2"
           >
-            <option value="24">24 hours</option>
-            <option value="48">48 hours</option>
-            <option value="72">3 days</option>
-            <option value="120">5 days</option>
-            <option value="168">7 days</option>
+            <option value="24">{t("hours24")}</option>
+            <option value="48">{t("hours48")}</option>
+            <option value="72">{t("days3")}</option>
+            <option value="120">{t("days5")}</option>
+            <option value="168">{t("days7")}</option>
           </select>
         </Field>
-        <Field label="Starting bid (ETB)">
+        <Field label={t("startingBid")}>
           <input
             type="number"
             name="startingBid"
@@ -90,7 +93,7 @@ export function ListingForm({ categories }) {
             className="w-full rounded-xl border border-forest/15 px-3 py-2"
           />
         </Field>
-        <Field label="Bid increment (ETB)">
+        <Field label={t("bidIncrement")}>
           <input
             type="number"
             name="bidIncrement"
@@ -99,7 +102,7 @@ export function ListingForm({ categories }) {
             className="w-full rounded-xl border border-forest/15 px-3 py-2"
           />
         </Field>
-        <Field label="Reserve price (optional)">
+        <Field label={t("reserveOptional")}>
           <input
             type="number"
             name="reservePrice"
@@ -115,7 +118,7 @@ export function ListingForm({ categories }) {
         disabled={pending}
         className="w-full rounded-full bg-forest px-6 py-3 text-sm font-semibold text-on disabled:opacity-60 sm:w-auto"
       >
-        {pending ? "Publishing lot..." : "Publish auction"}
+        {pending ? t("publishing") : t("publishAuction")}
       </button>
     </form>
   );
@@ -131,6 +134,7 @@ function Field({ label, children }) {
 }
 
 function PhotoPicker() {
+  const { t } = useI18n();
   const inputRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -165,14 +169,14 @@ function PhotoPicker() {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-heading">
-          Lot photographs
+          {t("photographs")}
         </span>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           className="text-sm font-medium text-forest hover:text-gold"
         >
-          {files.length ? "Change photos" : "Choose photos"}
+          {files.length ? t("changePhotos") : t("choosePhotos")}
         </button>
       </div>
       <input
@@ -192,17 +196,17 @@ function PhotoPicker() {
             type="button"
             onClick={() => setOpen(true)}
             className="block w-full overflow-hidden rounded-2xl bg-forest/10"
-            aria-label="Preview selected photograph"
+            aria-label={t("previewSelected")}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={current}
-              alt={files[active]?.name || "Selected photograph"}
+              alt={files[active]?.name || t("selectedPhotograph")}
               className="aspect-[4/3] w-full object-cover"
             />
           </button>
           <p className="text-xs text-muted">
-            Click the photo to preview it full size. {files.length} of 8 selected.
+            {t("photoHelp", { count: files.length })}
           </p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {previews.map((src, index) => (
@@ -213,7 +217,7 @@ function PhotoPicker() {
                   className={`block w-full overflow-hidden rounded-xl ring-2 ${
                     index === active ? "ring-gold" : "ring-transparent"
                   }`}
-                  aria-label={`Preview ${files[index]?.name || `photo ${index + 1}`}`}
+                  aria-label={t("previewNamed", { name: files[index]?.name || t("photoN", { index: index + 1 }) })}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={src} alt="" className="h-20 w-full object-cover" />
@@ -222,7 +226,7 @@ function PhotoPicker() {
                   type="button"
                   onClick={() => sync(files.filter((_, item) => item !== index))}
                   className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-forest-deep text-xs text-on"
-                  aria-label={`Remove ${files[index]?.name || `photo ${index + 1}`}`}
+                  aria-label={t("removeNamed", { name: files[index]?.name || t("photoN", { index: index + 1 }) })}
                 >
                   ×
                 </button>
@@ -236,7 +240,7 @@ function PhotoPicker() {
           onClick={() => inputRef.current?.click()}
           className="grid aspect-[4/3] w-full place-items-center rounded-2xl border border-dashed border-forest/25 bg-paper px-4 text-sm text-muted"
         >
-          Choose at least one photograph to preview the lot
+          {t("chooseOnePhoto")}
         </button>
       )}
 
@@ -244,7 +248,7 @@ function PhotoPicker() {
         <ImageLightbox
           images={previews}
           index={active}
-          title={files[active]?.name || "Lot photograph"}
+          title={files[active]?.name || t("lotPhotograph")}
           onClose={() => setOpen(false)}
           onSelect={setActive}
         />

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { formError } from "@/lib/locale";
 import { getAuctionStatus } from "@/lib/format";
 import {
   findHighestBid,
@@ -29,7 +30,7 @@ function digits(value) {
 export async function payListingAction(_, formData) {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "Sign in to complete this purchase." };
+    return formError("errSignInPay");
   }
 
   const listingId = clean(formData.get("listingId"));
@@ -41,63 +42,61 @@ export async function payListingAction(_, formData) {
   const cvv = digits(formData.get("cvv"));
 
   if (!isValidId(listingId)) {
-    return { error: "This lot could not be found." };
+    return formError("errLotMissing");
   }
   if (!METHODS[method]) {
-    return { error: "Choose a payment method." };
+    return formError("errPayMethod");
   }
   if (payerName.length < 3) {
-    return { error: "Enter the name on the payment account." };
+    return formError("errPayerName");
   }
 
   if (method === "TELEBIRR" || method === "CBE_BIRR") {
     const phone = digits(payerPhone);
     if (phone.length < 9 || phone.length > 12) {
-      return { error: "Enter a valid Ethiopian mobile number." };
+      return formError("errMobile");
     }
   }
 
   if (method === "CARD") {
     if (cardNumber.length < 13 || cardNumber.length > 19) {
-      return { error: "Enter a valid card number." };
+      return formError("errCard");
     }
     if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-      return { error: "Enter the card expiry as MM/YY." };
+      return formError("errExpiry");
     }
     if (cvv.length < 3 || cvv.length > 4) {
-      return { error: "Enter the card security code." };
+      return formError("errCvv");
     }
   }
 
   const listing = await findListingById(listingId);
   if (!listing) {
-    return { error: "This lot could not be found." };
+    return formError("errLotMissing");
   }
   if (String(listing.sellerId) === user.id) {
-    return { error: "You cannot buy your own consignment." };
+    return formError("errOwnBuy");
   }
 
   const status = getAuctionStatus(listing);
   if (status === "SOLD") {
-    return { error: "This lot has already been paid for." };
+    return formError("errAlreadyPaid");
   }
   if (status === "CANCELLED") {
-    return { error: "This lot is no longer for sale." };
+    return formError("errNotForSale");
   }
   if (status !== "ENDED") {
-    return {
-      error: "This lot is still open. The last bidder pays after it closes.",
-    };
+    return formError("errStillOpen");
   }
 
   const highest = await findHighestBid(listingId);
   if (!highest || String(highest.bidder?.id) !== user.id) {
-    return { error: "Only the winning bidder can settle this lot." };
+    return formError("errWinnerOnly");
   }
 
   const amount = Number(listing.currentBid || listing.startingBid);
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "This lot does not have a payable amount." };
+    return formError("errNoAmount");
   }
 
   const updated = await markListingSold({
@@ -108,7 +107,7 @@ export async function payListingAction(_, formData) {
   });
 
   if (!updated) {
-    return { error: "This lot was sold just now. Refresh and try another lot." };
+    return formError("errSoldRace");
   }
 
   await insertPayment({

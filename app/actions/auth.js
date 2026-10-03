@@ -13,6 +13,7 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
+import { formError } from "@/lib/locale";
 
 function clean(value) {
   return String(value || "").trim();
@@ -35,27 +36,27 @@ export async function registerAction(_, formData) {
   const next = clean(formData.get("next")) || "/dashboard";
 
   if (legalName.length < 2) {
-    return { error: "Please enter your legal name." };
+    return formError("errLegalName");
   }
   if (licenceNumber.length < 4) {
-    return { error: "Enter a valid licence number." };
+    return formError("errLicence");
   }
   if (phone.replace(/\D/g, "").length < 9) {
-    return { error: "Enter a valid phone number." };
+    return formError("errPhone");
   }
   if (password.length < 8) {
-    return { error: "Password must be at least 8 characters." };
+    return formError("errPassword");
   }
   if (!["BUYER", "SELLER", "BOTH"].includes(role)) {
-    return { error: "Please choose a valid account type." };
+    return formError("errAccountType");
   }
 
   const existing = await findUserByLicenceOrPhone(licenceNumber, phone);
   if (existing?.licenceNumber === licenceNumber) {
-    return { error: "An account with this licence number already exists." };
+    return formError("errLicenceExists");
   }
   if (existing?.phone === phone) {
-    return { error: "An account with this phone number already exists." };
+    return formError("errPhoneExists");
   }
 
   const user = await createUser({
@@ -77,7 +78,7 @@ export async function loginAction(_, formData) {
 
   const user = await findUserByLicence(licenceNumber);
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
-    return { error: "Invalid licence number or password." };
+    return formError("errLogin");
   }
 
   await createSession(toUserDTO(user));

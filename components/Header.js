@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { BrandMark } from "@/components/BrandMark";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
-
-const links = [
-  { href: "/auctions", label: "Auctions" },
-  { href: "/categories", label: "Categories" },
-  { href: "/sell", label: "Sell a lot" },
-];
+import { useI18n } from "@/components/LocaleProvider";
 
 export function Header() {
+  const { t } = useI18n();
+  const links = [
+    { href: "/auctions", label: t("auctions") },
+    { href: "/categories", label: t("categories") },
+    { href: "/sell", label: t("sellLot") },
+  ];
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
@@ -47,7 +49,7 @@ export function Header() {
                 Auction Ethiopia
               </span>
               <span className="block text-[10px] uppercase tracking-[0.2em] text-yellow">
-                Share Company
+                {t("shareCompany")}
               </span>
             </span>
           </Link>
@@ -68,7 +70,7 @@ export function Header() {
             <input
               type="search"
               name="q"
-              placeholder="Search lots"
+              placeholder={t("searchLots")}
               className="w-full rounded-full border border-forest/10 bg-field/80 px-4 py-2 text-sm outline-none"
             />
           </form>
@@ -89,7 +91,7 @@ export function Header() {
                     type="submit"
                     className="rounded-full bg-orange px-3.5 py-2 text-on hover:bg-orange/90"
                   >
-                    Sign out
+                    {t("signOut")}
                   </button>
                 </form>
               </>
@@ -99,22 +101,23 @@ export function Header() {
                   href="/login"
                   className="hidden rounded-full px-3 py-2 text-blue hover:bg-blue/10 sm:inline"
                 >
-                  Sign in
+                  {t("signIn")}
                 </Link>
                 <Link
                   href="/register"
                   className="rounded-full bg-forest px-4 py-2 font-semibold text-on hover:bg-forest-deep"
                 >
-                  Join
+                  {t("join")}
                 </Link>
               </>
             )}
+            <LanguageToggle />
             <ThemeToggle />
             <button
               type="button"
               className="grid h-11 w-11 place-items-center rounded-full border border-forest/15 text-forest lg:hidden"
               aria-expanded={open}
-              aria-label="Toggle menu"
+              aria-label={t("toggleMenu")}
               onClick={() => setOpen((value) => !value)}
             >
               {open ? "✕" : "☰"}
@@ -129,7 +132,7 @@ export function Header() {
             <input
               type="search"
               name="q"
-              placeholder="Search lots"
+              placeholder={t("searchLots")}
               className="w-full rounded-full border border-forest/15 bg-field px-4 py-2 text-sm outline-none"
             />
           </form>
@@ -146,12 +149,12 @@ export function Header() {
             ))}
             {ready && user ? (
               <Link href="/dashboard" className="rounded-2xl px-3 py-2" onClick={() => setOpen(false)}>
-                Dashboard
+                {t("dashboard")}
               </Link>
             ) : null}
             {ready && !user ? (
               <Link href="/login" className="rounded-2xl px-3 py-2" onClick={() => setOpen(false)}>
-                Sign in
+                {t("signIn")}
               </Link>
             ) : null}
           </nav>

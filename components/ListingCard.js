@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { effectiveEndsAt, formatETB, parseImages, statusLabel } from "@/lib/format";
+import { getLocale } from "@/lib/locale";
+import { categoryName, cityName, translate } from "@/lib/messages";
 import { Countdown } from "./Countdown";
 
-export function ListingCard({ listing }) {
+export async function ListingCard({ listing }) {
+  const locale = await getLocale();
+  const t = (key, vars) => translate(locale, key, vars);
   const image = parseImages(listing.images)[0];
   const status = listing.computedStatus || listing.status;
 
@@ -19,7 +23,7 @@ export function ListingCard({ listing }) {
             />
           ) : (
             <div className="grid h-full place-items-center text-sm text-muted">
-              No image yet
+              {t("noImage")}
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-forest-deep via-forest-deep/75 to-transparent" />
@@ -34,10 +38,10 @@ export function ListingCard({ listing }) {
                     : "bg-orange text-on"
             }`}
           >
-            {statusLabel(status)}
+            {statusLabel(status, locale)}
           </span>
           <p className="absolute bottom-3 left-3 right-3 text-[11px] uppercase tracking-[0.16em] text-yellow">
-            {listing.category?.name} · {listing.location}
+            {categoryName(locale, listing.category)} · {cityName(locale, listing.location)}
           </p>
         </div>
         <div className="space-y-4 p-4 sm:p-5">
@@ -46,13 +50,13 @@ export function ListingCard({ listing }) {
           </h3>
           <div className="flex items-end justify-between gap-3 border-t border-forest/10 pt-3">
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted">Current bid</p>
+              <p className="text-[11px] uppercase tracking-wide text-muted">{t("currentBid")}</p>
               <p className="text-lg font-semibold text-blue">
-                {formatETB(listing.currentBid)}
+                {formatETB(listing.currentBid, locale)}
               </p>
             </div>
             <div className="text-right text-sm">
-              <p className="text-muted">{listing._count?.bids || 0} bids</p>
+              <p className="text-muted">{t("bidsCount", { count: listing._count?.bids || 0 })}</p>
               <Countdown endsAt={effectiveEndsAt(listing)} className="font-semibold text-orange" />
             </div>
           </div>

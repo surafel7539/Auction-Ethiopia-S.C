@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useI18n } from "@/components/LocaleProvider";
 
 export function ImageLightbox({
   images,
@@ -9,6 +10,7 @@ export function ImageLightbox({
   onClose,
   onSelect,
 }) {
+  const { t } = useI18n();
   const current = images[index];
 
   useEffect(() => {
@@ -39,14 +41,14 @@ export function ImageLightbox({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={title ? `${title} photograph preview` : "Photograph preview"}
+      aria-label={title ? t("photoPreviewTitle", { title }) : t("photoPreview")}
     >
       <button
         type="button"
         onClick={onClose}
         className="absolute right-4 top-4 rounded-full bg-paper px-3 py-1.5 text-sm font-medium text-forest"
       >
-        Close
+        {t("close")}
       </button>
       {images.length > 1 ? (
         <>
@@ -57,7 +59,7 @@ export function ImageLightbox({
               onSelect((index - 1 + images.length) % images.length);
             }}
             className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-paper px-3 py-2 text-forest"
-            aria-label="Previous photograph"
+            aria-label={t("previousPhoto")}
           >
             ‹
           </button>
@@ -68,7 +70,7 @@ export function ImageLightbox({
               onSelect((index + 1) % images.length);
             }}
             className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-paper px-3 py-2 text-forest"
-            aria-label="Next photograph"
+            aria-label={t("nextPhoto")}
           >
             ›
           </button>
@@ -77,7 +79,7 @@ export function ImageLightbox({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={current}
-        alt={title || "Lot photograph"}
+        alt={title || t("lotPhotograph")}
         className="max-h-[85vh] max-w-full rounded-2xl object-contain"
         onClick={(event) => event.stopPropagation()}
       />

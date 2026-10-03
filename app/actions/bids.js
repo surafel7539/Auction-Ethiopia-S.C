@@ -2,49 +2,48 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
-import { getAuctionStatus, getNextMinBid } from "@/lib/format";
+import { formatETB, getAuctionStatus, getNextMinBid } from "@/lib/format";
+import { formError, getLocale } from "@/lib/locale";
 import { findListingById, insertBid, updateListingBid } from "@/lib/models";
 import { isValidId } from "@/lib/serialize";
 
 export async function placeBidAction(_, formData) {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "Sign in to place a bid." };
+    return formError("errSignInBid");
   }
 
   const listingId = String(formData.get("listingId") || "");
   const amount = Number(formData.get("amount"));
 
   if (!isValidId(listingId)) {
-    return { error: "Missing auction lot." };
+    return formError("errMissingLot");
   }
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "Enter a valid bid amount." };
+    return formError("errBidAmount");
   }
 
   const listing = await findListingById(listingId);
   if (!listing) {
-    return { error: "This lot could not be found." };
+    return formError("errLotMissing");
   }
   if (String(listing.sellerId) === user.id) {
-    return { error: "You cannot bid on your own listing." };
+    return formError("errOwnBid");
   }
 
   const status = getAuctionStatus(listing);
   if (status !== "LIVE") {
-    return { error: "This auction is no longer accepting bids." };
+    return formError("errNotAccepting");
   }
 
   const minimum = getNextMinBid(listing);
   if (amount < minimum) {
-    return {
-      error: `Your bid must be at least ETB ${minimum.toLocaleString("en-ET")}.`,
-    };
+    return formError("errBidMinimum", { amount: formatETB(minimum, await getLocale()) });
   }
 
   const updated = await updateListingBid(listingId, user.id, amount);
   if (!updated) {
-    return { error: "Another bid landed first. Refresh and try again." };
+    return formError("errBidRace");
   }
 
   await insertBid({

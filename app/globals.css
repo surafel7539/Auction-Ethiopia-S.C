@@ -169,3 +169,8 @@ html.dark ::selection {
   background: #eab308;
   color: #111111;
 }
+
+html[lang="am"] body,
+html[lang="am"] .display {
+  font-family: var(--font-ethiopic), "Ebrima", "Nyala", sans-serif;
+}

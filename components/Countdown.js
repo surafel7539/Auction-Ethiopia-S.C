@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/LocaleProvider";
 
 function getParts(endsAt) {
   const remaining = new Date(endsAt).getTime() - Date.now();
@@ -23,6 +24,7 @@ function getParts(endsAt) {
 }
 
 export function Countdown({ endsAt, className = "" }) {
+  const { t } = useI18n();
   const [parts, setParts] = useState(null);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function Countdown({ endsAt, className = "" }) {
 
   return (
     <span className={className} suppressHydrationWarning>
-      {parts?.ended ? "Ended" : parts?.label || "—"}
+      {parts?.ended ? t("statusEnded") : parts?.label || "—"}
     </span>
   );
 }

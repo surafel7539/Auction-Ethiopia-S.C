@@ -1,6 +1,9 @@
-import { Cormorant_Garamond, Source_Sans_3, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Source_Sans_3, Geist_Mono, Noto_Sans_Ethiopic } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { getLocale } from "@/lib/locale";
+import { translate } from "@/lib/messages";
 import "./globals.css";
 
 const serif = Cormorant_Garamond({
@@ -19,25 +22,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: {
-    default: "Auction Ethiopia S.C",
-    template: "%s · Auction Ethiopia S.C",
-  },
-  description:
-    "Ethiopia's premier auction house for vehicles, property, art, and commercial assets.",
-  icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg",
-  },
-};
+const ethiopic = Noto_Sans_Ethiopic({
+  variable: "--font-ethiopic",
+  subsets: ["ethiopic"],
+  weight: ["400", "600", "700"],
+});
 
-export default function RootLayout({ children }) {
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return {
+    title: {
+      default: "Auction Ethiopia S.C",
+      template: "%s · Auction Ethiopia S.C",
+    },
+    description: translate(locale, "metaDescription"),
+    icons: {
+      icon: "/logo.jpg",
+      apple: "/logo.jpg",
+    },
+  };
+}
+
+export default async function RootLayout({ children }) {
+  const locale = await getLocale();
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
-      className={`${serif.variable} ${sans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${serif.variable} ${sans.variable} ${geistMono.variable} ${ethiopic.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -47,9 +59,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="flex min-h-full flex-col font-sans text-foreground">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <LocaleProvider locale={locale}>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </LocaleProvider>
       </body>
     </html>
   );

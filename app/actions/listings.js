@@ -5,6 +5,7 @@ import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser, canSell } from "@/lib/auth";
+import { formError } from "@/lib/locale";
 import { CONDITIONS, LOCATIONS } from "@/lib/constants";
 import {
   cancelListing,
@@ -42,10 +43,10 @@ async function saveImages(files) {
 export async function createListingAction(_, formData) {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "Please sign in to create a listing." };
+    return formError("errSignInSell");
   }
   if (!canSell(user)) {
-    return { error: "Your account is not enabled for selling. Register as a seller." };
+    return formError("errNotSeller");
   }
 
   const title = clean(formData.get("title"));
@@ -59,44 +60,44 @@ export async function createListingAction(_, formData) {
   const durationHours = Number(formData.get("durationHours") || 72);
   const files = formData.getAll("images");
   if (!files.some((file) => file && typeof file !== "string" && file.size)) {
-    return { error: "Add at least one photograph of the lot." };
+    return formError("errPhotoRequired");
   }
   if (files.some((file) => file && typeof file !== "string" && file.size > 5 * 1024 * 1024)) {
-    return { error: "Each photograph must be 5 MB or smaller." };
+    return formError("errPhotoSize");
   }
   const images = await saveImages(files);
 
   if (title.length < 4) {
-    return { error: "Give the lot a clear title (at least 4 characters)." };
+    return formError("errTitle");
   }
   if (description.length < 20) {
-    return { error: "Please add a fuller description of the lot." };
+    return formError("errDescription");
   }
   if (!categoryId || !isValidId(categoryId)) {
-    return { error: "Choose a category." };
+    return formError("errChooseCategory");
   }
   if (!Number.isFinite(startingBid) || startingBid <= 0) {
-    return { error: "Starting bid must be a positive amount." };
+    return formError("errStartingBid");
   }
   if (!Number.isFinite(bidIncrement) || bidIncrement <= 0) {
-    return { error: "Bid increment must be a positive amount." };
+    return formError("errIncrement");
   }
   if (!CONDITIONS.includes(condition)) {
-    return { error: "Choose a valid condition." };
+    return formError("errCondition");
   }
   if (!LOCATIONS.includes(location)) {
-    return { error: "Choose a valid location." };
+    return formError("errLocation");
   }
   if (![24, 48, 72, 120, 168].includes(durationHours)) {
-    return { error: "Choose a valid auction duration." };
+    return formError("errDuration");
   }
   if (!images.length) {
-    return { error: "Add at least one photograph of the lot." };
+    return formError("errPhotoRequired");
   }
 
   const category = await findCategoryById(categoryId);
   if (!category) {
-    return { error: "That category does not exist." };
+    return formError("errCategoryMissing");
   }
 
   const listing = await createListing({
@@ -123,21 +124,21 @@ export async function createListingAction(_, formData) {
 
 export async function cancelListingAction(listingId) {
   const user = await getCurrentUser();
-  if (!user) return { error: "Please sign in." };
-  if (!isValidId(listingId)) return { error: "Invalid listing." };
+  if (!user) return formError("errSignIn");
+  if (!isValidId(listingId)) return formError("errInvalidListing");
 
   const listing = await findListingById(listingId);
   if (!listing || String(listing.sellerId) !== user.id) {
-    return { error: "You can only cancel your own listings." };
+    return formError("errCancelOwn");
   }
 
   if (listing.status === "SOLD") {
-    return { error: "A sold lot cannot be cancelled." };
+    return formError("errCancelSold");
   }
 
   const bidCount = await countBids(listingId);
   if (bidCount > 0) {
-    return { error: "A listing with bids cannot be cancelled." };
+    return formError("errCancelBids");
   }
 
   await cancelListing(listingId);

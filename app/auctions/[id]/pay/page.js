@@ -2,20 +2,24 @@ import { notFound, redirect } from "next/navigation";
 import { PaymentForm } from "@/components/PaymentForm";
 import { getCurrentUser } from "@/lib/auth";
 import { formatETB, parseImages } from "@/lib/format";
+import { getLocale } from "@/lib/locale";
 import { canPurchaseListing, getHighestBid, getListingById } from "@/lib/listings";
+import { categoryName, cityName, conditionName, translate } from "@/lib/messages";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const listing = await getListingById(id);
+  const [listing, locale] = await Promise.all([getListingById(id), getLocale()]);
   return {
-    title: listing ? `Pay · ${listing.title}` : "Payment",
+    title: listing ? `${translate(locale, "payForLot")} · ${listing.title}` : translate(locale, "settlement"),
   };
 }
 
 export default async function PayListingPage({ params }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const t = (key, vars) => translate(locale, key, vars);
   const listing = await getListingById(id);
   if (!listing) notFound();
 
@@ -31,14 +35,13 @@ export default async function PayListingPage({ params }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
-        Settlement
+        {t("settlement")}
       </p>
       <h1 className="display page-title mt-2 text-heading">
-        Pay for this lot
+        {t("payForLot")}
       </h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
-        The winning bidder pays the house after the lot closes. A live lot
-        cannot be bought early.
+        {t("payBody")}
       </p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -52,19 +55,22 @@ export default async function PayListingPage({ params }) {
             />
           ) : (
             <div className="grid aspect-[4/3] place-items-center bg-forest/10 text-sm text-muted">
-              No photograph
+              {t("noPhotographShort")}
             </div>
           )}
           <div className="space-y-2 p-5">
             <p className="text-[11px] uppercase tracking-[0.18em] text-gold">
-              {listing.category?.name} · {listing.location}
+              {categoryName(locale, listing.category)} · {cityName(locale, listing.location)}
             </p>
             <h2 className="display text-2xl text-heading">{listing.title}</h2>
             <p className="text-sm text-muted">
-              {listing.condition} · Consigned by {listing.seller.name}
+              {t("conditionBy", {
+                condition: conditionName(locale, listing.condition),
+                name: listing.seller.name,
+              })}
             </p>
             <p className="text-lg font-semibold text-ink">
-              {formatETB(listing.currentBid)}
+              {formatETB(listing.currentBid, locale)}
             </p>
           </div>
         </div>
@@ -72,16 +78,17 @@ export default async function PayListingPage({ params }) {
         <div className="card-shadow rounded-3xl border border-forest/10 bg-paper p-5 sm:p-8">
           {listing.computedStatus === "SOLD" ? (
             <p className="text-sm text-heading">
-              This lot is already sold
-              {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""}.
+              {listing.buyer?.name
+                ? t("alreadySoldTo", { name: listing.buyer.name })
+                : t("alreadySold")}
             </p>
           ) : allowed ? (
             <PaymentForm listing={listing} defaultName={user.legalName} />
           ) : (
             <p className="text-sm text-muted">
               {user.id === listing.sellerId
-                ? "You cannot buy your own consignment."
-                : "This lot is not available for your account to purchase."}
+                ? t("cannotBuyOwn")
+                : t("notAvailable")}
             </p>
           )}
         </div>

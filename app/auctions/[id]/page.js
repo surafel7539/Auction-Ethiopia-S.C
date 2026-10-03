@@ -14,6 +14,8 @@ import {
   parseImages,
   statusLabel,
 } from "@/lib/format";
+import { getLocale } from "@/lib/locale";
+import { categoryName, cityName, conditionName, translate } from "@/lib/messages";
 import {
   getHighestBid,
   getListingById,
@@ -34,6 +36,8 @@ export async function generateMetadata({ params }) {
 export default async function ListingPage({ params, searchParams }) {
   const { id } = await params;
   const query = await searchParams;
+  const locale = await getLocale();
+  const t = (key, vars) => translate(locale, key, vars);
   const listing = await getListingById(id);
   if (!listing) notFound();
 
@@ -62,14 +66,14 @@ export default async function ListingPage({ params, searchParams }) {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <p className="text-sm text-muted">
         <Link href="/auctions" className="hover:text-forest">
-          Auctions
+          {t("auctions")}
         </Link>
         {" / "}
         <Link
           href={`/categories/${listing.category.slug}`}
           className="hover:text-forest"
         >
-          {listing.category.name}
+          {categoryName(locale, listing.category)}
         </Link>
       </p>
 
@@ -78,7 +82,7 @@ export default async function ListingPage({ params, searchParams }) {
           <ListingGallery images={images} title={listing.title} />
 
           <div className="mt-8 space-y-4">
-            <h2 className="display section-title text-heading">Lot notes</h2>
+            <h2 className="display section-title text-heading">{t("lotNotes")}</h2>
             <p className="whitespace-pre-wrap text-sm leading-7 text-muted sm:text-base sm:leading-8">
               {listing.description}
             </p>
@@ -99,7 +103,7 @@ export default async function ListingPage({ params, searchParams }) {
                         : "bg-forest text-on"
                 }`}
               >
-                {statusLabel(listing.computedStatus)}
+                {statusLabel(listing.computedStatus, locale)}
               </span>
               {user ? (
                 <WatchButton listingId={listing.id} watching={watching} />
@@ -109,21 +113,24 @@ export default async function ListingPage({ params, searchParams }) {
               {listing.title}
             </h1>
             <p className="mt-2 text-sm text-muted">
-              {listing.condition} · {listing.location} · Consigned by{" "}
-              {listing.seller.name}
+              {t("consignedBy", {
+                condition: conditionName(locale, listing.condition),
+                location: cityName(locale, listing.location),
+                name: listing.seller.name,
+              })}
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
               <Stat
-                label="Current bid"
-                value={formatETB(listing.currentBid)}
+                label={t("currentBid")}
+                value={formatETB(listing.currentBid, locale)}
                 tone="text-blue"
               />
               <Stat
-                label={listing.computedStatus === "SCHEDULED" ? "Opens" : "Time remaining"}
+                label={listing.computedStatus === "SCHEDULED" ? t("opens") : t("timeRemaining")}
                 value={
                   listing.computedStatus === "SCHEDULED" ? (
-                    formatDate(listing.startsAt)
+                    formatDate(listing.startsAt, locale)
                   ) : (
                     <Countdown
                       endsAt={effectiveEndsAt(listing)}
@@ -133,53 +140,55 @@ export default async function ListingPage({ params, searchParams }) {
                 }
                 tone="text-orange"
               />
-              <Stat label="Bids" value={String(listing._count.bids)} />
+              <Stat label={t("bids")} value={String(listing._count.bids)} />
               <Stat
-                label="Increment"
-                value={formatETB(listing.bidIncrement)}
+                label={t("increment")}
+                value={formatETB(listing.bidIncrement, locale)}
                 tone="text-green"
               />
             </div>
 
             {listing.reservePrice ? (
               <p className="mt-4 text-sm text-muted">
-                Reserve:{" "}
                 {listing.currentBid >= listing.reservePrice
-                  ? "met"
-                  : "not yet met"}
+                  ? t("reserveMet")
+                  : t("reserveNotMet")}
               </p>
             ) : (
-              <p className="mt-4 text-sm text-muted">No reserve</p>
+              <p className="mt-4 text-sm text-muted">{t("noReserve")}</p>
             )}
 
             {query?.paid === "1" ? (
               <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
-                Payment recorded. This lot is now sold.
+                {t("paymentRecorded")}
               </p>
             ) : null}
 
             {listing.computedStatus === "SOLD" ? (
               <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
-                Sold
-                {listing.buyer?.name ? ` to ${listing.buyer.name}` : ""} at{" "}
-                {`${formatETB(listing.paidAmount || listing.currentBid)}.`}
+                {listing.buyer?.name
+                  ? t("soldTo", {
+                      name: listing.buyer.name,
+                      amount: formatETB(listing.paidAmount || listing.currentBid, locale),
+                    })
+                  : t("soldBare", {
+                      amount: formatETB(listing.paidAmount || listing.currentBid, locale),
+                    })}
               </p>
             ) : null}
 
             {winner ? (
               <p className="mt-4 rounded-xl bg-gold-soft/50 px-3 py-2 text-sm text-heading">
-                Hammered to {winner.name} at {formatETB(highest.amount)}.
+                {t("hammeredTo", { name: winner.name, amount: formatETB(highest.amount, locale) })}
               </p>
             ) : null}
 
             <p className="mt-4 text-xs text-muted">
               {listing.computedStatus === "SCHEDULED"
-                ? `Bidding opens ${formatDate(listing.startsAt)}. `
+                ? `${t("biddingOpens", { date: formatDate(listing.startsAt, locale) })} `
                 : ""}
-              Closes {formatDate(effectiveEndsAt(listing))}
-              {listing.bidCount
-                ? ". A new bid resets a 2-hour window; if nobody bids, the last bid wins."
-                : "."}
+              {t("closesOn", { date: formatDate(effectiveEndsAt(listing), locale) })}
+              {listing.bidCount ? ` ${t("idleRule")}` : ""}
             </p>
           </div>
 
@@ -192,19 +201,19 @@ export default async function ListingPage({ params, searchParams }) {
           {showBuy ? (
             <div className="rounded-2xl border border-orange/30 bg-paper p-4">
               <p className="text-sm text-heading">
-                You won this lot. Pay the house to settle the hammer price.
+                {t("youWon")}
               </p>
               <Link
                 href={`/auctions/${listing.id}/pay`}
                 className="mt-3 block rounded-2xl bg-orange px-5 py-4 text-center text-sm font-semibold text-on"
               >
-                Pay {formatETB(listing.currentBid)} to settle
+                {t("payToSettle", { amount: formatETB(listing.currentBid, locale) })}
               </Link>
             </div>
           ) : null}
 
           <div className="panel rounded-[1.8rem] p-6">
-            <h2 className="display text-2xl text-heading">Bid history</h2>
+            <h2 className="display text-2xl text-heading">{t("bidHistory")}</h2>
             {listing.bids.length ? (
               <ul className="mt-4 space-y-3">
                 {listing.bids.map((bid) => (
@@ -214,14 +223,14 @@ export default async function ListingPage({ params, searchParams }) {
                   >
                     <span>{bid.bidder.name}</span>
                     <span className="font-medium text-blue">
-                      {formatETB(bid.amount)}
+                      {formatETB(bid.amount, locale)}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="mt-3 text-sm text-muted">
-                No bids yet. Be the first.
+                {t("noBidsYet")}
               </p>
             )}
           </div>
@@ -231,7 +240,7 @@ export default async function ListingPage({ params, searchParams }) {
       {related.length ? (
         <section className="mt-16">
           <h2 className="display section-title text-heading">
-            More in {listing.category.name}
+            {t("moreIn", { name: categoryName(locale, listing.category) })}
           </h2>
           <div className="mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
             {related.map((item) => (

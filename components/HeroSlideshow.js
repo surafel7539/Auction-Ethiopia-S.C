@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/components/LocaleProvider";
 
 const INTERVAL_MS = 5000;
 
 export function HeroSlideshow({ slides }) {
+  const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -50,7 +52,7 @@ export function HeroSlideshow({ slides }) {
             slideIndex === index ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          <p className="text-[11px] uppercase tracking-[0.18em] text-orange">Featured lot</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-orange">{t("featuredLot")}</p>
           <p className="display mt-1 text-2xl leading-tight">{slide.title}</p>
           <p className="mt-2 text-sm text-blue">{slide.price}</p>
         </Link>

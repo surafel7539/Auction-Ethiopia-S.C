@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { loginAction, registerAction } from "@/app/actions/auth";
+import { useI18n } from "@/components/LocaleProvider";
 
 export function AuthForm({ mode = "login", next = "/dashboard" }) {
+  const { t } = useI18n();
   const action = mode === "register" ? registerAction : loginAction;
   const [state, formAction, pending] = useActionState(action, {});
 
@@ -19,12 +21,10 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
           Auction Ethiopia S.C
         </p>
         <h1 className="display mt-2 text-3xl text-heading">
-          {mode === "register" ? "Open an account" : "Client sign in"}
+          {mode === "register" ? t("openAccount") : t("clientSignIn")}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          {mode === "register"
-            ? "Register with your legal name, licence, phone, and password."
-            : "Sign in with your licence number and password."}
+          {mode === "register" ? t("registerHelp") : t("signInHelp")}
         </p>
       </div>
 
@@ -34,7 +34,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
             name="legalName"
             required
             autoComplete="name"
-            placeholder="Legal name"
+            placeholder={t("legalName")}
             className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
           />
           <input
@@ -42,7 +42,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
             type="tel"
             required
             autoComplete="tel"
-            placeholder="Phone number"
+            placeholder={t("phoneNumber")}
             className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
           />
           <select
@@ -50,9 +50,9 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
             defaultValue="BOTH"
             className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2 text-lg"
           >
-            <option value="BUYER">Buyer</option>
-            <option value="SELLER">Seller</option>
-            <option value="BOTH">Buyer and seller</option>
+            <option value="BUYER">{t("buyer")}</option>
+            <option value="SELLER">{t("seller")}</option>
+            <option value="BOTH">{t("buyerAndSeller")}</option>
           </select>
         </>
       ) : null}
@@ -61,12 +61,12 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
         name="licenceNumber"
         required
         autoComplete="username"
-        placeholder="Licence number"
+        placeholder={t("licenceNumber")}
         className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
       />
       <PasswordField
         autoComplete={mode === "register" ? "new-password" : "current-password"}
-        placeholder={mode === "register" ? "Password (8+ characters)" : "Password"}
+        placeholder={mode === "register" ? t("passwordHint") : t("password")}
       />
 
       {state?.error ? <p className="text-sm text-clay">{state.error}</p> : null}
@@ -76,26 +76,22 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
         disabled={pending}
         className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-on disabled:opacity-60"
       >
-        {pending
-          ? "Please wait..."
-          : mode === "register"
-            ? "Create account"
-            : "Sign in"}
+        {pending ? t("pleaseWait") : mode === "register" ? t("createAccount") : t("signIn")}
       </button>
 
       <p className="text-center text-sm text-muted">
         {mode === "register" ? (
           <>
-            Already registered?{" "}
+            {t("alreadyRegistered")}{" "}
             <Link href={`/login?next=${encodeURIComponent(next)}`} className="text-forest">
-              Sign in
+              {t("signIn")}
             </Link>
           </>
         ) : (
           <>
-            New client?{" "}
+            {t("newClient")}{" "}
             <Link href={`/register?next=${encodeURIComponent(next)}`} className="text-forest">
-              Create an account
+              {t("createAnAccount")}
             </Link>
           </>
         )}
@@ -103,7 +99,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
 
       {mode === "login" ? (
         <p className="rounded-xl bg-gold-soft/40 px-3 py-2 text-xs text-heading">
-          Demo buyer licence: AE-BUY-001 / Demo1234!
+          {t("demoBuyer")}
         </p>
       ) : null}
     </form>
@@ -111,6 +107,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
 }
 
 function PasswordField({ autoComplete, placeholder }) {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
 
   return (
@@ -128,7 +125,7 @@ function PasswordField({ autoComplete, placeholder }) {
         type="button"
         onClick={() => setVisible((open) => !open)}
         aria-pressed={visible}
-        aria-label={visible ? "Hide password" : "Show password"}
+        aria-label={visible ? t("hidePassword") : t("showPassword")}
         className="absolute inset-y-0 right-1 my-1 flex w-9 items-center justify-center rounded-lg text-forest hover:bg-gold-soft/60"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}
