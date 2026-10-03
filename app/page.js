@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroSlideshow } from "@/components/HeroSlideshow";
 import { ListingCard } from "@/components/ListingCard";
 import { formatDate, formatETB, parseImages } from "@/lib/format";
 import {
@@ -17,8 +18,11 @@ export default async function HomePage() {
     getScheduledListings(),
     getCategories(),
   ]);
-  const hero = featured[0];
-  const heroImage = hero ? parseImages(hero.images)[0] : "";
+  const slides = featured.flatMap((listing) => {
+    const image = parseImages(listing.images)[0];
+    if (!image) return [];
+    return [{ id: listing.id, title: listing.title, price: formatETB(listing.currentBid), image }];
+  });
   const lotCount = categories.reduce((sum, category) => sum + (category._count?.listings || 0), 0);
 
   return (
@@ -50,23 +54,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="relative min-h-80">
-          {heroImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 bg-blue/30" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-forest-deep via-forest-deep/20 to-transparent lg:bg-gradient-to-l" />
-          {hero ? (
-            <Link
-              href={`/auctions/${hero.id}`}
-              className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/20 bg-paper/95 p-4 text-heading shadow-xl sm:left-auto sm:w-80"
-            >
-              <p className="text-[11px] uppercase tracking-[0.18em] text-orange">Featured lot</p>
-              <p className="display mt-1 text-2xl leading-tight">{hero.title}</p>
-              <p className="mt-2 text-sm text-blue">{formatETB(hero.currentBid)}</p>
-            </Link>
-          ) : null}
+          <HeroSlideshow slides={slides} />
         </div>
       </section>
 
