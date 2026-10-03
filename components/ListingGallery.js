@@ -21,7 +21,7 @@ export function ListingGallery({ images, title }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="block w-full overflow-hidden rounded-3xl bg-forest/10"
+        className="block w-full overflow-hidden rounded-[1.8rem] bg-forest/10 shadow-[0_24px_50px_-32px_rgba(46,16,101,0.7)]"
         aria-label={`Preview ${title}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

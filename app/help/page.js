@@ -35,7 +35,7 @@ const steps = [
 
 export default function HelpPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
       <p className="text-xs uppercase tracking-[0.22em] text-yellow">
         How it works
       </p>
@@ -50,7 +50,7 @@ export default function HelpPage() {
         {steps.map((step, index) => (
           <li
             key={step.title}
-            className="card-shadow rounded-2xl border border-forest/10 bg-paper p-5 sm:p-6"
+            className="panel rounded-[1.6rem] p-5 sm:p-6"
           >
             <p className="text-xs uppercase tracking-wide text-yellow">
               Step {index + 1}
@@ -63,7 +63,7 @@ export default function HelpPage() {
         ))}
       </ol>
 
-      <section className="card-shadow mt-4 rounded-2xl border border-forest/10 bg-paper p-5 sm:p-6">
+      <section className="panel mt-4 rounded-[1.6rem] p-5 sm:p-6">
         <h2 className="display text-2xl text-forest-deep">Sellers</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-muted sm:text-base">
           <li>
@@ -84,7 +84,7 @@ export default function HelpPage() {
         </ul>
       </section>
 
-      <section className="card-shadow mt-4 rounded-2xl border border-forest/10 bg-paper p-5 sm:p-6">
+      <section className="panel mt-4 rounded-[1.6rem] p-5 sm:p-6">
         <h2 className="display text-2xl text-forest-deep">Payment methods</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-muted sm:text-base">
           <li>

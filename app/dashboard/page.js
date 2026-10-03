@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Client desk
       </p>
@@ -54,7 +54,7 @@ export default async function DashboardPage() {
       <section className="mt-12">
         <h2 className="display section-title text-forest-deep">My listings</h2>
         {listings.length ? (
-          <div className="mt-5 overflow-x-auto rounded-2xl border border-forest/10 bg-paper">
+          <div className="panel mt-5 overflow-x-auto rounded-[1.6rem]">
             <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="bg-forest text-gold-soft">
                 <tr>

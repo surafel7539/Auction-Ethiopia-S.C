@@ -18,7 +18,7 @@ export default async function SellPage() {
   const categories = await getCategories();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Consignment
       </p>
@@ -33,7 +33,7 @@ export default async function SellPage() {
           combined account to consign lots.
         </p>
       ) : (
-        <div className="card-shadow mt-8 rounded-3xl border border-forest/10 bg-paper p-4 sm:p-6 md:p-8">
+        <div className="panel mt-8 rounded-[1.8rem] p-4 sm:p-6 md:p-8">
           <ListingForm categories={categories} />
         </div>
       )}

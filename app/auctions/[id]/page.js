@@ -59,7 +59,7 @@ export default async function ListingPage({ params, searchParams }) {
     highest?.bidder?.id === user?.id;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <p className="text-sm text-muted">
         <Link href="/auctions" className="hover:text-forest">
           Auctions
@@ -85,8 +85,8 @@ export default async function ListingPage({ params, searchParams }) {
           </div>
         </div>
 
-        <aside className="space-y-5">
-          <div className="card-shadow rounded-3xl border border-forest/10 bg-paper p-5 sm:p-6">
+        <aside className="space-y-5 lg:sticky lg:top-28 lg:self-start">
+          <div className="panel rounded-[1.8rem] p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span
                 className={`rounded-full px-3 py-1 text-xs uppercase tracking-wide ${
@@ -199,7 +199,7 @@ export default async function ListingPage({ params, searchParams }) {
             </div>
           ) : null}
 
-          <div className="rounded-3xl border border-forest/10 bg-paper p-6">
+          <div className="panel rounded-[1.8rem] p-6">
             <h2 className="display text-2xl text-forest-deep">Bid history</h2>
             {listing.bids.length ? (
               <ul className="mt-4 space-y-3">

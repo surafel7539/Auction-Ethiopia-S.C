@@ -30,7 +30,7 @@ export default async function PayListingPage({ params }) {
   const allowed = canPurchaseListing(user, listing, highest);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">
         Settlement
       </p>

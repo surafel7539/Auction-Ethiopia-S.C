@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:py-16">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">The house</p>
       <h1 className="display page-title mt-2 text-forest-deep">
         About Auction Ethiopia S.C

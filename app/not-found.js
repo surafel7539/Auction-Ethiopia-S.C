@@ -4,7 +4,7 @@ export const dynamic = "force-static";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-xl px-4 py-16 text-center sm:py-24">
+    <div className="mx-auto max-w-xl px-4 py-20 text-center sm:py-28">
       <p className="text-xs uppercase tracking-[0.22em] text-gold">404</p>
       <h1 className="display page-title mt-3 text-forest-deep">Lot not found</h1>
       <p className="mt-4 text-muted">

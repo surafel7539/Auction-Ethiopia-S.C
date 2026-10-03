@@ -26,9 +26,9 @@ export default async function AuctionsPage({ searchParams }) {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-      <p className="text-xs uppercase tracking-[0.22em] text-gold">Catalogue</p>
-      <h1 className="display page-title mt-2 text-forest-deep">Live auctions</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+      <p className="text-xs uppercase tracking-[0.22em] text-yellow">Catalogue</p>
+      <h1 className="display page-title mt-2 text-blue">Live auctions</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
         Filter by price, city, status, or category. Every bid is recorded
         against the lot and visible to registered clients.
@@ -38,7 +38,7 @@ export default async function AuctionsPage({ searchParams }) {
       </div>
       <p className="mt-6 text-sm text-muted">{listings.length} lots</p>
       {listings.length ? (
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {listings.map((listing) => (
             <ListingCard key={listing.id} listing={listing} />
           ))}

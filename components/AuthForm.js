@@ -11,7 +11,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
   return (
     <form
       action={formAction}
-      className="card-shadow mx-auto w-full max-w-md space-y-4 rounded-3xl border border-forest/10 bg-paper p-5 sm:p-8"
+      className="panel mx-auto w-full max-w-md space-y-4 rounded-[1.8rem] p-5 sm:p-8"
     >
       <input type="hidden" name="next" value={next} />
       <div>

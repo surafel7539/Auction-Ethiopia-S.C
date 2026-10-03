@@ -12,7 +12,7 @@ export default async function CategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <p className="text-xs uppercase tracking-[0.22em] text-yellow">Departments</p>
       <h1 className="display page-title mt-2 text-blue">Categories</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
@@ -26,7 +26,7 @@ export default async function CategoriesPage() {
             <Link
               key={category.id}
               href={`/categories/${category.slug}`}
-              className="card-shadow rounded-3xl border border-forest/10 bg-paper p-5 sm:p-8"
+              className="panel rounded-[1.8rem] p-6 transition hover:-translate-y-1 sm:p-8"
               style={{ borderLeftWidth: 6, borderLeftColor: meta.accent || "#6d28d9" }}
             >
               <span className="text-3xl">{meta.icon || "◆"}</span>
