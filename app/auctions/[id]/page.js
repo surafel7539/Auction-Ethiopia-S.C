@@ -21,6 +21,8 @@ import {
   isWatching,
 } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const listing = await getListingById(id);

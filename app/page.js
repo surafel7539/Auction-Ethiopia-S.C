@@ -7,6 +7,8 @@ import {
   getFeaturedListings,
 } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [featured, endingSoon, categories] = await Promise.all([
     getFeaturedListings(),

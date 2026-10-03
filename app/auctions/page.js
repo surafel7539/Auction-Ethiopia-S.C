@@ -2,6 +2,8 @@ import { FilterBar } from "@/components/FilterBar";
 import { ListingCard } from "@/components/ListingCard";
 import { getCategories, getListings } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Live auctions",
 };

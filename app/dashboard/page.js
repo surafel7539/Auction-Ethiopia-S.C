@@ -5,6 +5,8 @@ import { requireUser } from "@/lib/auth";
 import { formatETB, getAuctionStatus } from "@/lib/format";
 import { getDashboardData } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Client desk",
 };

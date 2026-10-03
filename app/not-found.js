@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const dynamic = "force-static";
+
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-xl px-4 py-16 text-center sm:py-24">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { BrandMark } from "@/components/BrandMark";
@@ -12,8 +12,28 @@ const links = [
   { href: "/help", label: "How it works" },
 ];
 
-export function Header({ user }) {
+export function Header() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/me")
+      .then((response) => (response.ok ? response.json() : { user: null }))
+      .then((data) => {
+        if (!cancelled) setUser(data.user || null);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 border-b border-forest/10 bg-paper/90 backdrop-blur">
@@ -49,7 +69,9 @@ export function Header({ user }) {
         </form>
 
         <div className="flex items-center gap-2 text-sm">
-          {user ? (
+          {!ready ? (
+            <span className="inline-block h-9 w-16" aria-hidden="true" />
+          ) : user ? (
             <>
               <Link
                 href="/dashboard"
@@ -114,15 +136,16 @@ export function Header({ user }) {
                 {link.label}
               </Link>
             ))}
-            {user ? (
+            {ready && user ? (
               <Link href="/dashboard" onClick={() => setOpen(false)}>
                 Dashboard
               </Link>
-            ) : (
+            ) : null}
+            {ready && !user ? (
               <Link href="/login" onClick={() => setOpen(false)}>
                 Sign in
               </Link>
-            )}
+            ) : null}
           </nav>
         </div>
       ) : null}

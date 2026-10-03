@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatETB, parseImages } from "@/lib/format";
 import { canPurchaseListing, getHighestBid, getListingById } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const listing = await getListingById(id);

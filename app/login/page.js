@@ -1,14 +1,15 @@
-import { AuthForm } from "@/components/AuthForm";
+import { AuthScreen } from "@/components/AuthScreen";
+
+export const dynamic = "force-static";
 
 export const metadata = {
   title: "Sign in",
 };
 
-export default async function LoginPage({ searchParams }) {
-  const params = await searchParams;
+export default function LoginPage() {
   return (
     <div className="px-4 py-10 sm:py-16">
-      <AuthForm mode="login" next={params.next || "/dashboard"} />
+      <AuthScreen mode="login" />
     </div>
   );
 }

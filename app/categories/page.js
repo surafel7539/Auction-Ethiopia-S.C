@@ -2,6 +2,8 @@ import Link from "next/link";
 import { CATEGORY_META } from "@/lib/constants";
 import { getCategories } from "@/lib/listings";
 
+export const dynamic = "force-static";
+
 export const metadata = {
   title: "Categories",
 };

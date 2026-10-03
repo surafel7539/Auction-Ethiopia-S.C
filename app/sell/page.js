@@ -3,6 +3,8 @@ import { ListingForm } from "@/components/ListingForm";
 import { getCurrentUser, canSell } from "@/lib/auth";
 import { getCategories } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Sell a lot",
 };

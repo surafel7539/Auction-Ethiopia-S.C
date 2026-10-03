@@ -4,6 +4,8 @@ import { ListingCard } from "@/components/ListingCard";
 import { CATEGORY_META } from "@/lib/constants";
 import { getCategories, getCategoryBySlug, getListings } from "@/lib/listings";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
