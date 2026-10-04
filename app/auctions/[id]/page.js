@@ -188,7 +188,6 @@ export default async function ListingPage({ params, searchParams }) {
                 ? `${t("biddingOpens", { date: formatDate(listing.startsAt, locale) })} `
                 : ""}
               {t("closesOn", { date: formatDate(effectiveEndsAt(listing), locale) })}
-              {listing.bidCount ? ` ${t("idleRule")}` : ""}
             </p>
           </div>
 

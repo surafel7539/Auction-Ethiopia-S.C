@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { setLocaleAction } from "@/app/actions/locale";
 import { useI18n } from "@/components/LocaleProvider";
 
 export function LanguageToggle() {
@@ -9,11 +8,11 @@ export function LanguageToggle() {
   const [pending, setPending] = useState(false);
   const amharic = locale === "am";
 
-  async function toggle() {
+  function toggle() {
     if (pending) return;
     const next = amharic ? "en" : "am";
     setPending(true);
-    await setLocaleAction(next);
+    document.cookie = `auction-lang=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
     window.location.reload();
   }
 

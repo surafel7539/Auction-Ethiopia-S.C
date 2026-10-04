@@ -34,7 +34,12 @@ export default async function DashboardPage() {
         {t("clientDesk")}
       </p>
       <h1 className="display page-title mt-2 text-heading">
-        {t("welcome", { name: user.legalName.split(" ")[0] })}
+        {t("welcome", {
+          name: (user.accountKind === "ORGANISATION" && user.contactName
+            ? user.contactName
+            : user.legalName
+          ).split(" ")[0],
+        })}
       </h1>
       <p className="mt-3 text-muted">
         {t("accountLine", {

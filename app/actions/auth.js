@@ -28,14 +28,24 @@ function normalizePhone(value) {
 }
 
 export async function registerAction(_, formData) {
-  const legalName = clean(formData.get("legalName"));
   const licenceNumber = normalizeLicence(formData.get("licenceNumber"));
   const phone = normalizePhone(formData.get("phone"));
   const password = String(formData.get("password") || "");
   const role = clean(formData.get("role")) || "BUYER";
   const next = clean(formData.get("next")) || "/dashboard";
+  const selling = role === "SELLER" || role === "BOTH";
+  const accountKind = selling ? clean(formData.get("accountKind")) : "";
+  const contactName = clean(formData.get("contactName"));
+  const city = clean(formData.get("city"));
+  const legalName = clean(formData.get("legalName"));
 
-  if (legalName.length < 2) {
+  if (selling && !["INDIVIDUAL", "ORGANISATION"].includes(accountKind)) {
+    return formError("errAccountKind");
+  }
+  if (accountKind === "ORGANISATION") {
+    if (legalName.length < 2) return formError("errCompanyName");
+    if (contactName.length < 2) return formError("errContactName");
+  } else if (legalName.length < 2) {
     return formError("errLegalName");
   }
   if (licenceNumber.length < 4) {
@@ -65,6 +75,9 @@ export async function registerAction(_, formData) {
     phone,
     passwordHash: await hashPassword(password),
     role,
+    accountKind: accountKind || undefined,
+    contactName: accountKind === "ORGANISATION" ? contactName : "",
+    city: accountKind === "ORGANISATION" ? city : "",
   });
 
   await createSession(toUserDTO(user));

@@ -24,6 +24,7 @@ export async function Footer() {
           <div className="mt-4 flex flex-col gap-2 text-sm text-on/85">
             <Link href="/auctions" className="hover:text-lime">{t("liveAuctions")}</Link>
             <Link href="/categories" className="hover:text-lime">{t("categories")}</Link>
+            <Link href="/suppliers" className="hover:text-lime">{t("suppliers")}</Link>
             <Link href="/sell" className="hover:text-lime">{t("sellWithUs")}</Link>
           </div>
         </div>

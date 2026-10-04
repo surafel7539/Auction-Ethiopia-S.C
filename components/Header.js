@@ -8,28 +8,28 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useI18n } from "@/components/LocaleProvider";
 
-export function Header() {
+export function Header({ user: initialUser = null }) {
   const { t } = useI18n();
   const links = [
     { href: "/auctions", label: t("auctions") },
     { href: "/categories", label: t("categories") },
+    { href: "/suppliers", label: t("suppliers") },
     { href: "/sell", label: t("sellLot") },
   ];
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false);
+  const [user, setUser] = useState(initialUser);
+  const [ready, setReady] = useState(Boolean(initialUser));
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/me")
-      .then((response) => (response.ok ? response.json() : { user: null }))
+      .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (!cancelled) setUser(data.user || null);
+        if (cancelled || !data) return;
+        setUser(data.user || null);
+        setReady(true);
       })
       .catch(() => {
-        if (!cancelled) setUser(null);
-      })
-      .finally(() => {
         if (!cancelled) setReady(true);
       });
     return () => {
@@ -75,14 +75,14 @@ export function Header() {
             />
           </form>
 
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex shrink-0 items-center gap-2 text-sm">
             {!ready ? (
               <span className="inline-block h-9 w-16" aria-hidden="true" />
             ) : user ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="hidden rounded-full px-3 py-2 text-blue hover:bg-blue/10 sm:inline"
+                  className="max-w-[7rem] truncate rounded-full px-2 py-2 text-blue hover:bg-blue/10 sm:max-w-28 sm:px-3"
                 >
                   {user.name.split(" ")[0]}
                 </Link>

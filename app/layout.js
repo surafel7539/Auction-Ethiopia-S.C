@@ -2,6 +2,7 @@ import { Cormorant_Garamond, Source_Sans_3, Geist_Mono, Noto_Sans_Ethiopic } fro
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { LocaleProvider } from "@/components/LocaleProvider";
+import { getCurrentUser } from "@/lib/auth";
 import { getLocale } from "@/lib/locale";
 import { translate } from "@/lib/messages";
 import "./globals.css";
@@ -45,6 +46,8 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const locale = await getLocale();
+  const user = await getCurrentUser();
+  const headerUser = user?.name ? { name: user.name } : null;
   return (
     <html
       lang={locale}
@@ -60,7 +63,7 @@ export default async function RootLayout({ children }) {
       </head>
       <body className="flex min-h-full flex-col font-sans text-foreground">
         <LocaleProvider locale={locale}>
-          <Header />
+          <Header user={headerUser} />
           <main className="flex-1">{children}</main>
           <Footer />
         </LocaleProvider>

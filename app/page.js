@@ -50,10 +50,9 @@ export default async function HomePage() {
               {t("consignLot")}
             </Link>
           </div>
-          <div className="mt-10 grid grid-cols-3 gap-3 border-t border-white/10 pt-6">
+          <div className="mt-10 grid grid-cols-2 gap-3 border-t border-white/10 pt-6">
             <Stat value={String(lotCount)} label={t("lots")} />
             <Stat value={String(categories.length)} label={t("departments")} />
-            <Stat value="2h" label={t("quietClose")} />
           </div>
         </div>
         <div className="relative min-h-80">

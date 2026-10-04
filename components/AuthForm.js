@@ -5,10 +5,15 @@ import { useActionState, useState } from "react";
 import { loginAction, registerAction } from "@/app/actions/auth";
 import { useI18n } from "@/components/LocaleProvider";
 
+const fieldClass = "w-full rounded-xl border border-forest/15 bg-field px-3 py-2 text-lg";
+
 export function AuthForm({ mode = "login", next = "/dashboard" }) {
   const { t } = useI18n();
   const action = mode === "register" ? registerAction : loginAction;
   const [state, formAction, pending] = useActionState(action, {});
+  const [role, setRole] = useState("BOTH");
+  const [kind, setKind] = useState("");
+  const selling = role === "SELLER" || role === "BOTH";
 
   return (
     <form
@@ -30,50 +35,114 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
 
       {mode === "register" ? (
         <>
-          <input
-            name="legalName"
-            required
-            autoComplete="name"
-            placeholder={t("legalName")}
-            className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
-          />
-          <input
-            name="phone"
-            type="tel"
-            required
-            autoComplete="tel"
-            placeholder={t("phoneNumber")}
-            className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
-          />
           <select
             name="role"
-            defaultValue="BOTH"
-            className="w-full rounded-xl border border-forest/15 bg-field px-3 py-2 text-lg"
+            value={role}
+            onChange={(event) => setRole(event.target.value)}
+            className={fieldClass}
           >
             <option value="BUYER">{t("buyer")}</option>
             <option value="SELLER">{t("seller")}</option>
             <option value="BOTH">{t("buyerAndSeller")}</option>
           </select>
+          {selling ? (
+            <div>
+              <p className="mb-2 text-xs uppercase tracking-[0.18em] text-yellow">{t("sellingAs")}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  aria-pressed={kind === "INDIVIDUAL"}
+                  onClick={() => setKind("INDIVIDUAL")}
+                  className={`rounded-2xl border px-3 py-3 text-sm font-semibold ${
+                    kind === "INDIVIDUAL"
+                      ? "border-forest bg-forest text-on"
+                      : "border-forest/15 bg-field text-heading"
+                  }`}
+                >
+                  {t("individual")}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={kind === "ORGANISATION"}
+                  onClick={() => setKind("ORGANISATION")}
+                  className={`rounded-2xl border px-3 py-3 text-sm font-semibold ${
+                    kind === "ORGANISATION"
+                      ? "border-forest bg-forest text-on"
+                      : "border-forest/15 bg-field text-heading"
+                  }`}
+                >
+                  {t("organisation")}
+                </button>
+              </div>
+              {kind ? <input type="hidden" name="accountKind" value={kind} /> : null}
+            </div>
+          ) : null}
+          {!selling || kind === "INDIVIDUAL" ? (
+            <input
+              name="legalName"
+              required
+              autoComplete="name"
+              placeholder={t("legalName")}
+              className={fieldClass}
+            />
+          ) : null}
+          {selling && kind === "ORGANISATION" ? (
+            <>
+              <input
+                name="legalName"
+                required
+                autoComplete="organization"
+                placeholder={t("companyName")}
+                className={fieldClass}
+              />
+              <input
+                name="contactName"
+                required
+                autoComplete="name"
+                placeholder={t("contactPerson")}
+                className={fieldClass}
+              />
+              <input
+                name="city"
+                placeholder={t("supplierCity")}
+                className={fieldClass}
+              />
+            </>
+          ) : null}
+          {!selling || kind ? (
+            <input
+              name="phone"
+              type="tel"
+              required
+              autoComplete="tel"
+              placeholder={t("phoneNumber")}
+              className={fieldClass}
+            />
+          ) : null}
         </>
       ) : null}
 
-      <input
-        name="licenceNumber"
-        required
-        autoComplete="username"
-        placeholder={t("licenceNumber")}
-        className="w-full rounded-xl border border-forest/15 px-3 py-2 text-lg"
-      />
-      <PasswordField
-        autoComplete={mode === "register" ? "new-password" : "current-password"}
-        placeholder={mode === "register" ? t("passwordHint") : t("password")}
-      />
+      {mode === "login" || !selling || kind ? (
+        <>
+          <input
+            name="licenceNumber"
+            required
+            autoComplete="username"
+            placeholder={selling && kind === "ORGANISATION" ? t("tradeLicence") : t("licenceNumber")}
+            className={fieldClass}
+          />
+          <PasswordField
+            autoComplete={mode === "register" ? "new-password" : "current-password"}
+            placeholder={mode === "register" ? t("passwordHint") : t("password")}
+          />
+        </>
+      ) : null}
 
       {state?.error ? <p className="text-sm text-clay">{state.error}</p> : null}
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || (mode === "register" && selling && !kind)}
         className="w-full rounded-full bg-forest py-3 text-sm font-semibold text-on disabled:opacity-60"
       >
         {pending ? t("pleaseWait") : mode === "register" ? t("createAccount") : t("signIn")}
