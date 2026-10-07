@@ -46,7 +46,7 @@ export function Header({ user: initialUser = null }) {
             <BrandMark className="h-10 w-10" />
             <span className="min-w-0 leading-tight">
               <span className="block truncate display text-lg text-heading">
-                Auction Ethiopia
+                Crown Bid
               </span>
               <span className="block text-[10px] uppercase tracking-[0.2em] text-yellow">
                 {t("shareCompany")}

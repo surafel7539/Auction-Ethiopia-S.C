@@ -23,7 +23,7 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
       <input type="hidden" name="next" value={next} />
       <div>
         <p className="text-xs uppercase tracking-[0.22em] text-gold">
-          Auction Ethiopia S.C
+          Crown Bid
         </p>
         <h1 className="display mt-2 text-3xl text-heading">
           {mode === "register" ? t("openAccount") : t("clientSignIn")}

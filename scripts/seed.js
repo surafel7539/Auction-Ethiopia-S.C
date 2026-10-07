@@ -1,73 +1,26 @@
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcryptjs");
-const mongoose = require("mongoose");
+const mysql = require("mysql2/promise");
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/auction-ethiopia";
-
-const userSchema = new mongoose.Schema(
-  {
-    legalName: String,
-    licenceNumber: { type: String, unique: true },
-    phone: { type: String, unique: true },
-    passwordHash: String,
-    role: { type: String, default: "BUYER" },
-  },
-  { timestamps: { createdAt: true, updatedAt: false } },
-);
-
-const categorySchema = new mongoose.Schema({
-  slug: { type: String, unique: true },
-  name: String,
-  description: String,
-});
-
-const listingSchema = new mongoose.Schema(
-  {
-    title: String,
-    description: String,
-    images: String,
-    startingBid: Number,
-    currentBid: Number,
-    bidIncrement: Number,
-    reservePrice: Number,
-    condition: String,
-    location: String,
-    status: { type: String, default: "LIVE" },
-    startsAt: { type: Date, default: Date.now },
-    endsAt: Date,
-    lastBidAt: Date,
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
-    seller: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    bidCount: { type: Number, default: 0 },
-    watchCount: { type: Number, default: 0 },
-  },
-  { timestamps: { createdAt: true, updatedAt: false } },
-);
-
-const bidSchema = new mongoose.Schema(
-  {
-    amount: Number,
-    listing: { type: mongoose.Schema.Types.ObjectId, ref: "Listing" },
-    bidder: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  },
-  { timestamps: { createdAt: true, updatedAt: false } },
-);
-
-const User = mongoose.models.User || mongoose.model("User", userSchema);
-const Category =
-  mongoose.models.Category || mongoose.model("Category", categorySchema);
-const Listing =
-  mongoose.models.Listing || mongoose.model("Listing", listingSchema);
-const Bid = mongoose.models.Bid || mongoose.model("Bid", bidSchema);
-const Watch =
-  mongoose.models.Watch ||
-  mongoose.model(
-    "Watch",
-    new mongoose.Schema({
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      listing: { type: mongoose.Schema.Types.ObjectId, ref: "Listing" },
-    }),
-  );
+const envPath = path.join(__dirname, "..", ".env.local");
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const index = trimmed.indexOf("=");
+    if (index === -1) continue;
+    const key = trimmed.slice(0, index).trim();
+    let value = trimmed.slice(index + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (!process.env[key] || process.env[key] === "") process.env[key] = value;
+  }
+}
 
 const categories = [
   {
@@ -116,45 +69,62 @@ const categories = [
 ];
 
 async function main() {
-  await mongoose.connect(MONGODB_URI);
-  await Promise.all([
-    Watch.deleteMany({}),
-    Bid.deleteMany({}),
-    Listing.deleteMany({}),
-    Category.deleteMany({}),
-    User.deleteMany({}),
-  ]);
-  await User.collection.dropIndexes().catch(() => {});
+  const admin = await mysql.createConnection({
+    host: process.env.MYSQL_HOST || "127.0.0.1",
+    port: Number(process.env.MYSQL_PORT || 3306),
+    user: process.env.MYSQL_USER || "root",
+    password: process.env.MYSQL_PASSWORD || "",
+    multipleStatements: true,
+  });
+  await admin.query(
+    `CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQL_DATABASE || "crownbid"}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+  );
+  await admin.end();
+
+  const db = await mysql.createConnection({
+    host: process.env.MYSQL_HOST || "127.0.0.1",
+    port: Number(process.env.MYSQL_PORT || 3306),
+    user: process.env.MYSQL_USER || "root",
+    password: process.env.MYSQL_PASSWORD || "",
+    database: process.env.MYSQL_DATABASE || "crownbid",
+    multipleStatements: true,
+    decimalNumbers: true,
+  });
+
+  await db.query(`
+    SET FOREIGN_KEY_CHECKS = 0;
+    DROP TABLE IF EXISTS payments, watches, bids, listings, categories, users;
+    SET FOREIGN_KEY_CHECKS = 1;
+  `);
+  await db.query(fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8"));
 
   const passwordHash = await bcrypt.hash("Demo1234!", 10);
 
-  const seller = await User.create({
-    legalName: "Hanna Bekele",
-    licenceNumber: "AE-SELL-001",
-    phone: "+251911234567",
-    passwordHash,
-    role: "SELLER",
-  });
+  const [sellerResult] = await db.execute(
+    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+    ["Hanna Bekele", "AE-SELL-001", "+251911234567", passwordHash, "SELLER"],
+  );
+  const [buyerResult] = await db.execute(
+    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+    ["Dawit Tesfaye", "AE-BUY-001", "+251922111222", passwordHash, "BUYER"],
+  );
+  const [bothResult] = await db.execute(
+    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+    ["Meron Alemu", "AE-BOTH-001", "+251933444555", passwordHash, "BOTH"],
+  );
 
-  const buyer = await User.create({
-    legalName: "Dawit Tesfaye",
-    licenceNumber: "AE-BUY-001",
-    phone: "+251922111222",
-    passwordHash,
-    role: "BUYER",
-  });
-
-  const both = await User.create({
-    legalName: "Meron Alemu",
-    licenceNumber: "AE-BOTH-001",
-    phone: "+251933444555",
-    passwordHash,
-    role: "BOTH",
-  });
+  const seller = { id: sellerResult.insertId };
+  const buyer = { id: buyerResult.insertId };
+  const both = { id: bothResult.insertId };
+  const sellers = { seller: seller.id, both: both.id };
 
   const createdCategories = {};
   for (const category of categories) {
-    createdCategories[category.slug] = await Category.create(category);
+    const [result] = await db.execute(
+      "INSERT INTO categories (slug, name, description) VALUES (?, ?, ?)",
+      [category.slug, category.name, category.description],
+    );
+    createdCategories[category.slug] = result.insertId;
   }
 
   const now = Date.now();
@@ -176,8 +146,8 @@ async function main() {
       condition: "Excellent",
       location: "Addis Ababa",
       endsAt: hours(18),
-      category: createdCategories.vehicles._id,
-      seller: seller._id,
+      categorySlug: "vehicles",
+      sellerKey: "seller",
     },
     {
       title: "Bole 3-Bedroom Apartment with City View",
@@ -192,8 +162,8 @@ async function main() {
       condition: "Good",
       location: "Addis Ababa",
       endsAt: hours(42),
-      category: createdCategories["real-estate"]._id,
-      seller: both._id,
+      categorySlug: "real-estate",
+      sellerKey: "both",
     },
     {
       title: "Contemporary Ethiopian Painting, Mixed Media",
@@ -208,8 +178,8 @@ async function main() {
       condition: "Like New",
       location: "Addis Ababa",
       endsAt: hours(8),
-      category: createdCategories["art-antiques"]._id,
-      seller: seller._id,
+      categorySlug: "art-antiques",
+      sellerKey: "seller",
     },
     {
       title: "MacBook Pro 16-inch Lot of Five Units",
@@ -224,8 +194,8 @@ async function main() {
       condition: "Good",
       location: "Addis Ababa",
       endsAt: hours(30),
-      category: createdCategories.electronics._id,
-      seller: both._id,
+      categorySlug: "electronics",
+      sellerKey: "both",
     },
     {
       title: "22k Gold Filigree Cross Necklace",
@@ -240,8 +210,8 @@ async function main() {
       condition: "Excellent",
       location: "Gondar",
       endsAt: hours(12),
-      category: createdCategories.jewelry._id,
-      seller: seller._id,
+      categorySlug: "jewelry",
+      sellerKey: "seller",
     },
     {
       title: "45kVA Diesel Generator, Low Hours",
@@ -256,8 +226,8 @@ async function main() {
       condition: "Good",
       location: "Adama",
       endsAt: hours(60),
-      category: createdCategories.industrial._id,
-      seller: both._id,
+      categorySlug: "industrial",
+      sellerKey: "both",
     },
     {
       title: "Yirgacheffe Grade 1 Green Coffee, 50 Bags",
@@ -272,8 +242,8 @@ async function main() {
       condition: "New",
       location: "Hawassa",
       endsAt: hours(20),
-      category: createdCategories.agriculture._id,
-      seller: seller._id,
+      categorySlug: "agriculture",
+      sellerKey: "seller",
     },
     {
       title: "Imperial-Era Silver Coin Collection",
@@ -289,8 +259,8 @@ async function main() {
       location: "Dire Dawa",
       endsAt: hours(-6),
       status: "ENDED",
-      category: createdCategories.collectibles._id,
-      seller: both._id,
+      categorySlug: "collectibles",
+      sellerKey: "both",
     },
     {
       title: "Isuzu NPR Light Truck, 2020",
@@ -305,8 +275,8 @@ async function main() {
       condition: "Good",
       location: "Mekelle",
       endsAt: hours(54),
-      category: createdCategories.vehicles._id,
-      seller: seller._id,
+      categorySlug: "vehicles",
+      sellerKey: "seller",
     },
     {
       title: "Traditional Coffee Ceremony Set",
@@ -321,8 +291,8 @@ async function main() {
       condition: "Like New",
       location: "Jimma",
       endsAt: hours(36),
-      category: createdCategories.collectibles._id,
-      seller: both._id,
+      categorySlug: "collectibles",
+      sellerKey: "both",
     },
     {
       title: "2016 Toyota Hilux Double Cab",
@@ -337,8 +307,8 @@ async function main() {
       condition: "Good",
       location: "Bahir Dar",
       endsAt: hours(28),
-      category: createdCategories.vehicles._id,
-      seller: seller._id,
+      categorySlug: "vehicles",
+      sellerKey: "seller",
     },
     {
       title: "2019 Suzuki Dzire",
@@ -353,8 +323,8 @@ async function main() {
       condition: "Excellent",
       location: "Addis Ababa",
       endsAt: hours(40),
-      category: createdCategories.vehicles._id,
-      seller: both._id,
+      categorySlug: "vehicles",
+      sellerKey: "both",
     },
     {
       title: "CMC Villa Plot, 500 sqm",
@@ -369,8 +339,8 @@ async function main() {
       condition: "Good",
       location: "Addis Ababa",
       endsAt: hours(72),
-      category: createdCategories["real-estate"]._id,
-      seller: seller._id,
+      categorySlug: "real-estate",
+      sellerKey: "seller",
     },
     {
       title: "Hawassa Lakeside Retail Shop",
@@ -385,8 +355,8 @@ async function main() {
       condition: "Good",
       location: "Hawassa",
       endsAt: hours(50),
-      category: createdCategories["real-estate"]._id,
-      seller: both._id,
+      categorySlug: "real-estate",
+      sellerKey: "both",
     },
     {
       title: "Illuminated Ge'ez Manuscript Leaf",
@@ -401,8 +371,8 @@ async function main() {
       condition: "Excellent",
       location: "Gondar",
       endsAt: hours(16),
-      category: createdCategories["art-antiques"]._id,
-      seller: seller._id,
+      categorySlug: "art-antiques",
+      sellerKey: "seller",
     },
     {
       title: "Samsung 65-inch Display Lot of Eight",
@@ -417,8 +387,8 @@ async function main() {
       condition: "Like New",
       location: "Addis Ababa",
       endsAt: hours(22),
-      category: createdCategories.electronics._id,
-      seller: both._id,
+      categorySlug: "electronics",
+      sellerKey: "both",
     },
     {
       title: "HP Desktop Refresh, Twelve Units",
@@ -433,8 +403,8 @@ async function main() {
       condition: "Good",
       location: "Adama",
       endsAt: hours(34),
-      category: createdCategories.electronics._id,
-      seller: seller._id,
+      categorySlug: "electronics",
+      sellerKey: "seller",
     },
     {
       title: "Silver Wristwatch, Swiss Movement",
@@ -449,8 +419,8 @@ async function main() {
       condition: "Excellent",
       location: "Dire Dawa",
       endsAt: hours(14),
-      category: createdCategories.jewelry._id,
-      seller: seller._id,
+      categorySlug: "jewelry",
+      sellerKey: "seller",
     },
     {
       title: "350-Litre Concrete Mixer",
@@ -465,8 +435,8 @@ async function main() {
       condition: "Used",
       location: "Dire Dawa",
       endsAt: hours(48),
-      category: createdCategories.industrial._id,
-      seller: both._id,
+      categorySlug: "industrial",
+      sellerKey: "both",
     },
     {
       title: "2.5-Ton Warehouse Forklift",
@@ -481,8 +451,8 @@ async function main() {
       condition: "Good",
       location: "Addis Ababa",
       endsAt: hours(26),
-      category: createdCategories.industrial._id,
-      seller: seller._id,
+      categorySlug: "industrial",
+      sellerKey: "seller",
     },
     {
       title: "Massey Ferguson Tractor, 2014",
@@ -497,8 +467,8 @@ async function main() {
       condition: "Good",
       location: "Bahir Dar",
       endsAt: hours(44),
-      category: createdCategories.agriculture._id,
-      seller: both._id,
+      categorySlug: "agriculture",
+      sellerKey: "both",
     },
     {
       title: "White Honey, 200 kg",
@@ -513,8 +483,8 @@ async function main() {
       condition: "New",
       location: "Jimma",
       endsAt: hours(18),
-      category: createdCategories.agriculture._id,
-      seller: seller._id,
+      categorySlug: "agriculture",
+      sellerKey: "seller",
     },
     {
       title: "Ethiopian Stamp Album, 1960s",
@@ -529,8 +499,8 @@ async function main() {
       condition: "Excellent",
       location: "Addis Ababa",
       endsAt: hours(10),
-      category: createdCategories.collectibles._id,
-      seller: both._id,
+      categorySlug: "collectibles",
+      sellerKey: "both",
     },
     {
       title: "Bajaj Three-Wheeler Fleet of Four",
@@ -545,8 +515,8 @@ async function main() {
       condition: "Good",
       location: "Mekelle",
       endsAt: hours(38),
-      category: createdCategories.vehicles._id,
-      seller: seller._id,
+      categorySlug: "vehicles",
+      sellerKey: "seller",
     },
     {
       title: "Harar Woven Basket Set",
@@ -561,8 +531,8 @@ async function main() {
       condition: "Like New",
       location: "Dire Dawa",
       endsAt: hours(32),
-      category: createdCategories.collectibles._id,
-      seller: both._id,
+      categorySlug: "collectibles",
+      sellerKey: "both",
     },
     {
       title: "MacBook Air 13-inch",
@@ -577,8 +547,8 @@ async function main() {
       condition: "Like New",
       location: "Addis Ababa",
       endsAt: hours(26),
-      category: createdCategories.electronics._id,
-      seller: seller._id,
+      categorySlug: "electronics",
+      sellerKey: "seller",
     },
     {
       title: "iPhone 15",
@@ -593,8 +563,8 @@ async function main() {
       condition: "Excellent",
       location: "Addis Ababa",
       endsAt: hours(20),
-      category: createdCategories.electronics._id,
-      seller: both._id,
+      categorySlug: "electronics",
+      sellerKey: "both",
     },
     {
       title: "iPad Air",
@@ -609,8 +579,8 @@ async function main() {
       condition: "Excellent",
       location: "Addis Ababa",
       endsAt: hours(24),
-      category: createdCategories.electronics._id,
-      seller: seller._id,
+      categorySlug: "electronics",
+      sellerKey: "seller",
     },
     {
       title: "2022 Toyota Corolla Cross",
@@ -626,8 +596,8 @@ async function main() {
       location: "Addis Ababa",
       startsAt: hours(36),
       endsAt: hours(108),
-      category: createdCategories.vehicles._id,
-      seller: seller._id,
+      categorySlug: "vehicles",
+      sellerKey: "seller",
     },
     {
       title: "22k Gold Bracelet",
@@ -643,8 +613,8 @@ async function main() {
       location: "Gondar",
       startsAt: hours(18),
       endsAt: hours(90),
-      category: createdCategories.jewelry._id,
-      seller: both._id,
+      categorySlug: "jewelry",
+      sellerKey: "both",
     },
     {
       title: "Bole Commercial Floor",
@@ -660,8 +630,8 @@ async function main() {
       location: "Addis Ababa",
       startsAt: hours(72),
       endsAt: hours(168),
-      category: createdCategories["real-estate"]._id,
-      seller: seller._id,
+      categorySlug: "real-estate",
+      sellerKey: "seller",
     },
     {
       title: "Coffee Pulper, Station Size",
@@ -677,8 +647,8 @@ async function main() {
       location: "Hawassa",
       startsAt: hours(48),
       endsAt: hours(120),
-      category: createdCategories.agriculture._id,
-      seller: both._id,
+      categorySlug: "agriculture",
+      sellerKey: "both",
     },
     {
       title: "Vintage Medium-Format Camera",
@@ -694,8 +664,8 @@ async function main() {
       location: "Addis Ababa",
       startsAt: hours(12),
       endsAt: hours(84),
-      category: createdCategories.collectibles._id,
-      seller: seller._id,
+      categorySlug: "collectibles",
+      sellerKey: "seller",
     },
     {
       title: "Site Generator, 100kVA",
@@ -711,40 +681,54 @@ async function main() {
       location: "Adama",
       startsAt: hours(60),
       endsAt: hours(132),
-      category: createdCategories.industrial._id,
-      seller: both._id,
+      categorySlug: "industrial",
+      sellerKey: "both",
     },
   ];
 
   for (const listing of listings) {
     const hasBid = listing.currentBid > listing.startingBid;
-    const created = await Listing.create({
-      status: listing.status || "LIVE",
-      bidCount: hasBid ? 1 : 0,
-      ...listing,
-      lastBidAt: hasBid ? new Date() : null,
-    });
+    const [result] = await db.execute(
+      `INSERT INTO listings (
+        title, description, images, startingBid, currentBid, bidIncrement, reservePrice,
+        \`condition\`, location, status, startsAt, endsAt, lastBidAt, categoryId, sellerId, bidCount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        listing.title,
+        listing.description,
+        listing.images,
+        listing.startingBid,
+        listing.currentBid,
+        listing.bidIncrement,
+        listing.reservePrice ?? null,
+        listing.condition,
+        listing.location,
+        listing.status || "LIVE",
+        listing.startsAt || new Date(),
+        listing.endsAt,
+        hasBid ? new Date() : null,
+        createdCategories[listing.categorySlug],
+        sellers[listing.sellerKey],
+        hasBid ? 1 : 0,
+      ],
+    );
 
     if (hasBid) {
-      await Bid.create({
-        amount: created.currentBid,
-        listing: created._id,
-        bidder: buyer._id,
-      });
+      await db.execute(
+        "INSERT INTO bids (amount, listingId, bidderId) VALUES (?, ?, ?)",
+        [listing.currentBid, result.insertId, buyer.id],
+      );
     }
   }
 
-  console.log("Seeded Auction Ethiopia S.C demo data in MongoDB.");
+  await db.end();
+  console.log("Seeded Crown Bid demo data in MySQL.");
   console.log("Seller: AE-SELL-001 / Demo1234!");
   console.log("Buyer:  AE-BUY-001 / Demo1234!");
   console.log("Both:   AE-BOTH-001 / Demo1234!");
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await mongoose.disconnect();
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

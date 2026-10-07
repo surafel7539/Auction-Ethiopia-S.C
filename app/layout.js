@@ -33,13 +33,13 @@ export async function generateMetadata() {
   const locale = await getLocale();
   return {
     title: {
-      default: "Auction Ethiopia S.C",
-      template: "%s · Auction Ethiopia S.C",
+      default: "Crown Bid",
+      template: "%s · Crown Bid",
     },
     description: translate(locale, "metaDescription"),
     icons: {
-      icon: "/logo.jpg",
-      apple: "/logo.jpg",
+      icon: "/royalbid-gold.jpg",
+      apple: "/royalbid-gold.jpg",
     },
   };
 }

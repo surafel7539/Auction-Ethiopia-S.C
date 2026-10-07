@@ -13,7 +13,7 @@ export async function Footer() {
         <div className="lg:col-span-5">
           <Link href="/" className="flex items-center gap-3">
             <BrandMark className="h-12 w-12" />
-            <p className="display text-3xl">Auction Ethiopia S.C</p>
+            <p className="display text-3xl">Crown Bid</p>
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-7 text-on/75">
             {t("footerAbout")}
@@ -32,7 +32,7 @@ export async function Footer() {
           <p className="text-xs uppercase tracking-[0.22em] text-orange">{t("company")}</p>
           <div className="mt-4 flex flex-col gap-2 text-sm text-on/85">
             <Link href="/about" className="hover:text-lime">{t("aboutHouse")}</Link>
-            <a href="mailto:hello@auctionethiopia.com" className="hover:text-lime">{t("contact")}</a>
+            <a href="mailto:hello@crownbid.com" className="hover:text-lime">{t("contact")}</a>
           </div>
         </div>
         <div className="lg:col-span-3">
