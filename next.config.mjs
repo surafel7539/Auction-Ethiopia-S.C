@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
-  serverExternalPackages: ["mysql2"],
+  serverExternalPackages: ["pg"],
 };
 
 export default nextConfig;

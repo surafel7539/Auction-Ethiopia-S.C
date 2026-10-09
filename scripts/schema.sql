@@ -1,83 +1,74 @@
 CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  legalName VARCHAR(191) NOT NULL,
-  licenceNumber VARCHAR(64) NOT NULL UNIQUE,
+  id SERIAL PRIMARY KEY,
+  legal_name VARCHAR(191) NOT NULL,
+  licence_number VARCHAR(64) NOT NULL UNIQUE,
   phone VARCHAR(32) NOT NULL UNIQUE,
-  passwordHash VARCHAR(191) NOT NULL,
+  password_hash VARCHAR(191) NOT NULL,
   role VARCHAR(16) NOT NULL DEFAULT 'BUYER',
-  accountKind VARCHAR(32) NULL,
-  contactName VARCHAR(191) NOT NULL DEFAULT '',
+  account_kind VARCHAR(32) NULL,
+  contact_name VARCHAR(191) NOT NULL DEFAULT '',
   city VARCHAR(128) NOT NULL DEFAULT '',
-  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS categories (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   slug VARCHAR(64) NOT NULL UNIQUE,
   name VARCHAR(191) NOT NULL,
   description TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS listings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   images TEXT NOT NULL,
-  startingBid DECIMAL(14,2) NOT NULL,
-  currentBid DECIMAL(14,2) NOT NULL,
-  bidIncrement DECIMAL(14,2) NOT NULL DEFAULT 100,
-  reservePrice DECIMAL(14,2) NULL,
-  `condition` VARCHAR(64) NOT NULL,
+  starting_bid DECIMAL(14,2) NOT NULL,
+  current_bid DECIMAL(14,2) NOT NULL,
+  bid_increment DECIMAL(14,2) NOT NULL DEFAULT 100,
+  reserve_price DECIMAL(14,2) NULL,
+  condition VARCHAR(64) NOT NULL,
   location VARCHAR(128) NOT NULL,
   status VARCHAR(16) NOT NULL DEFAULT 'LIVE',
-  startsAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  endsAt DATETIME NOT NULL,
-  lastBidAt DATETIME NULL,
-  categoryId INT NOT NULL,
-  sellerId INT NOT NULL,
-  buyerId INT NULL,
-  paidAt DATETIME NULL,
-  paidAmount DECIMAL(14,2) NULL,
-  paymentMethod VARCHAR(32) NULL,
-  bidCount INT NOT NULL DEFAULT 0,
-  watchCount INT NOT NULL DEFAULT 0,
-  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_listings_category FOREIGN KEY (categoryId) REFERENCES categories(id),
-  CONSTRAINT fk_listings_seller FOREIGN KEY (sellerId) REFERENCES users(id),
-  CONSTRAINT fk_listings_buyer FOREIGN KEY (buyerId) REFERENCES users(id)
+  starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ends_at TIMESTAMPTZ NOT NULL,
+  last_bid_at TIMESTAMPTZ NULL,
+  category_id INT NOT NULL REFERENCES categories(id),
+  seller_id INT NOT NULL REFERENCES users(id),
+  buyer_id INT NULL REFERENCES users(id),
+  paid_at TIMESTAMPTZ NULL,
+  paid_amount DECIMAL(14,2) NULL,
+  payment_method VARCHAR(32) NULL,
+  bid_count INT NOT NULL DEFAULT 0,
+  watch_count INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS bids (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   amount DECIMAL(14,2) NOT NULL,
-  listingId INT NOT NULL,
-  bidderId INT NOT NULL,
-  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_bids_listing FOREIGN KEY (listingId) REFERENCES listings(id) ON DELETE CASCADE,
-  CONSTRAINT fk_bids_bidder FOREIGN KEY (bidderId) REFERENCES users(id)
+  listing_id INT NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  bidder_id INT NOT NULL REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS watches (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  userId INT NOT NULL,
-  listingId INT NOT NULL,
-  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uniq_watch (userId, listingId),
-  CONSTRAINT fk_watches_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_watches_listing FOREIGN KEY (listingId) REFERENCES listings(id) ON DELETE CASCADE
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_id INT NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, listing_id)
 );
 
 CREATE TABLE IF NOT EXISTS payments (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   amount DECIMAL(14,2) NOT NULL,
   method VARCHAR(32) NOT NULL,
   reference VARCHAR(64) NOT NULL,
-  payerName VARCHAR(191) NOT NULL,
-  payerPhone VARCHAR(32) NULL,
+  payer_name VARCHAR(191) NOT NULL,
+  payer_phone VARCHAR(32) NULL,
   last4 VARCHAR(8) NULL,
-  listingId INT NOT NULL,
-  buyerId INT NOT NULL,
-  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_payments_listing FOREIGN KEY (listingId) REFERENCES listings(id),
-  CONSTRAINT fk_payments_buyer FOREIGN KEY (buyerId) REFERENCES users(id)
+  listing_id INT NOT NULL REFERENCES listings(id),
+  buyer_id INT NOT NULL REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

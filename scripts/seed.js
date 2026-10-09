@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
-const mysql = require("mysql2/promise");
+const { Client } = require("pg");
 
 const envPath = path.join(__dirname, "..", ".env.local");
 if (fs.existsSync(envPath)) {
@@ -68,63 +68,72 @@ const categories = [
   },
 ];
 
-async function main() {
-  const admin = await mysql.createConnection({
-    host: process.env.MYSQL_HOST || "127.0.0.1",
-    port: Number(process.env.MYSQL_PORT || 3306),
-    user: process.env.MYSQL_USER || "root",
-    password: process.env.MYSQL_PASSWORD || "",
-    multipleStatements: true,
-  });
-  await admin.query(
-    `CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQL_DATABASE || "crownbid"}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
-  );
-  await admin.end();
+function postgresUrl() {
+  const raw =
+    process.env.SQL_POSTGRES_URL_NON_POOLING ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.SQL_POSTGRES_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    "";
+  if (!raw) {
+    throw new Error("Set SQL_POSTGRES_URL from your Supabase env snippet.");
+  }
+  const url = new URL(raw);
+  url.searchParams.delete("sslmode");
+  url.searchParams.delete("pgbouncer");
+  url.searchParams.delete("supa");
+  url.searchParams.delete("uselibpqcompat");
+  return url.toString();
+}
 
-  const db = await mysql.createConnection({
-    host: process.env.MYSQL_HOST || "127.0.0.1",
-    port: Number(process.env.MYSQL_PORT || 3306),
-    user: process.env.MYSQL_USER || "root",
-    password: process.env.MYSQL_PASSWORD || "",
-    database: process.env.MYSQL_DATABASE || "crownbid",
-    multipleStatements: true,
-    decimalNumbers: true,
+async function insertReturningId(db, sql, params) {
+  const result = await db.query(`${sql} RETURNING id`, params);
+  return result.rows[0].id;
+}
+
+async function main() {
+  const db = new Client({
+    connectionString: postgresUrl(),
+    ssl: { rejectUnauthorized: false },
   });
+  await db.connect();
 
   await db.query(`
-    SET FOREIGN_KEY_CHECKS = 0;
-    DROP TABLE IF EXISTS payments, watches, bids, listings, categories, users;
-    SET FOREIGN_KEY_CHECKS = 1;
+    DROP TABLE IF EXISTS payments, watches, bids, listings, categories, users CASCADE;
   `);
   await db.query(fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8"));
 
   const passwordHash = await bcrypt.hash("Demo1234!", 10);
 
-  const [sellerResult] = await db.execute(
-    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+  const sellerId = await insertReturningId(
+    db,
+    `INSERT INTO users (legal_name, licence_number, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5)`,
     ["Hanna Bekele", "AE-SELL-001", "+251911234567", passwordHash, "SELLER"],
   );
-  const [buyerResult] = await db.execute(
-    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+  const buyerId = await insertReturningId(
+    db,
+    `INSERT INTO users (legal_name, licence_number, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5)`,
     ["Dawit Tesfaye", "AE-BUY-001", "+251922111222", passwordHash, "BUYER"],
   );
-  const [bothResult] = await db.execute(
-    `INSERT INTO users (legalName, licenceNumber, phone, passwordHash, role) VALUES (?, ?, ?, ?, ?)`,
+  const bothId = await insertReturningId(
+    db,
+    `INSERT INTO users (legal_name, licence_number, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5)`,
     ["Meron Alemu", "AE-BOTH-001", "+251933444555", passwordHash, "BOTH"],
   );
 
-  const seller = { id: sellerResult.insertId };
-  const buyer = { id: buyerResult.insertId };
-  const both = { id: bothResult.insertId };
+  const seller = { id: sellerId };
+  const buyer = { id: buyerId };
+  const both = { id: bothId };
   const sellers = { seller: seller.id, both: both.id };
 
   const createdCategories = {};
   for (const category of categories) {
-    const [result] = await db.execute(
-      "INSERT INTO categories (slug, name, description) VALUES (?, ?, ?)",
+    createdCategories[category.slug] = await insertReturningId(
+      db,
+      "INSERT INTO categories (slug, name, description) VALUES ($1, $2, $3)",
       [category.slug, category.name, category.description],
     );
-    createdCategories[category.slug] = result.insertId;
   }
 
   const now = Date.now();
@@ -688,11 +697,12 @@ async function main() {
 
   for (const listing of listings) {
     const hasBid = listing.currentBid > listing.startingBid;
-    const [result] = await db.execute(
+    const listingId = await insertReturningId(
+      db,
       `INSERT INTO listings (
-        title, description, images, startingBid, currentBid, bidIncrement, reservePrice,
-        \`condition\`, location, status, startsAt, endsAt, lastBidAt, categoryId, sellerId, bidCount
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        title, description, images, starting_bid, current_bid, bid_increment, reserve_price,
+        condition, location, status, starts_at, ends_at, last_bid_at, category_id, seller_id, bid_count
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
       [
         listing.title,
         listing.description,
@@ -714,15 +724,15 @@ async function main() {
     );
 
     if (hasBid) {
-      await db.execute(
-        "INSERT INTO bids (amount, listingId, bidderId) VALUES (?, ?, ?)",
-        [listing.currentBid, result.insertId, buyer.id],
+      await db.query(
+        "INSERT INTO bids (amount, listing_id, bidder_id) VALUES ($1, $2, $3)",
+        [listing.currentBid, listingId, buyer.id],
       );
     }
   }
 
   await db.end();
-  console.log("Seeded Crown Bid demo data in MySQL.");
+  console.log("Seeded Crown Bid demo data in Supabase Postgres.");
   console.log("Seller: AE-SELL-001 / Demo1234!");
   console.log("Buyer:  AE-BUY-001 / Demo1234!");
   console.log("Both:   AE-BOTH-001 / Demo1234!");
