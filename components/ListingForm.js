@@ -3,13 +3,14 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { createListingAction } from "@/app/actions/listings";
 import { ImageLightbox } from "@/components/ImageLightbox";
-import { CONDITIONS, LOCATIONS } from "@/lib/constants";
+import { CONDITIONS, LOCATIONS, MAX_LISTING_PHOTOS } from "@/lib/constants";
 import { useI18n } from "@/components/LocaleProvider";
 import { categoryName, cityName, conditionName } from "@/lib/messages";
 
 export function ListingForm({ categories }) {
   const { locale, t } = useI18n();
   const [state, action, pending] = useActionState(createListingAction, {});
+  const [schedule, setSchedule] = useState(false);
 
   return (
     <form action={action} className="space-y-5">
@@ -111,6 +112,34 @@ export function ListingForm({ categories }) {
           />
         </Field>
       </div>
+      <div className="rounded-2xl border border-forest/10 p-4">
+        <label className="flex items-start gap-3 text-sm text-heading">
+          <input
+            type="checkbox"
+            name="scheduleEnabled"
+            value="1"
+            checked={schedule}
+            onChange={(event) => setSchedule(event.target.checked)}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-medium">{t("scheduleStart")}</span>
+            <span className="mt-1 block text-muted">{t("scheduleHelp")}</span>
+          </span>
+        </label>
+        {schedule ? (
+          <div className="mt-4">
+            <Field label={t("opensAt")}>
+              <input
+                type="datetime-local"
+                name="startsAt"
+                required
+                className="w-full rounded-xl border border-forest/15 px-3 py-2"
+              />
+            </Field>
+          </div>
+        ) : null}
+      </div>
       <PhotoPicker />
       {state?.error ? <p className="text-sm text-clay">{state.error}</p> : null}
       <button
@@ -150,7 +179,7 @@ function PhotoPicker() {
   }, [files]);
 
   function sync(nextFiles) {
-    const limited = nextFiles.slice(0, 8);
+    const limited = nextFiles.slice(0, MAX_LISTING_PHOTOS);
     setFiles(limited);
     setActive((current) => {
       if (!limited.length) return 0;
@@ -163,7 +192,20 @@ function PhotoPicker() {
     }
   }
 
+  function addFiles(incoming) {
+    const merged = [...files];
+    for (const file of incoming) {
+      if (merged.length >= MAX_LISTING_PHOTOS) break;
+      const duplicate = merged.some(
+        (existing) => existing.name === file.name && existing.size === file.size,
+      );
+      if (!duplicate) merged.push(file);
+    }
+    sync(merged);
+  }
+
   const current = previews[active];
+  const canAdd = files.length < MAX_LISTING_PHOTOS;
 
   return (
     <div className="space-y-3">
@@ -171,13 +213,15 @@ function PhotoPicker() {
         <span className="text-sm font-medium text-heading">
           {t("photographs")}
         </span>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="text-sm font-medium text-forest hover:text-gold"
-        >
-          {files.length ? t("changePhotos") : t("choosePhotos")}
-        </button>
+        {canAdd ? (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="text-sm font-medium text-forest hover:text-gold"
+          >
+            {files.length ? t("addPhotos") : t("choosePhotos")}
+          </button>
+        ) : null}
       </div>
       <input
         ref={inputRef}
@@ -186,7 +230,11 @@ function PhotoPicker() {
         accept="image/*"
         multiple
         required
-        onChange={(event) => sync(Array.from(event.target.files || []))}
+        onChange={(event) => {
+          const picked = Array.from(event.target.files || []);
+          event.target.value = "";
+          addFiles(picked);
+        }}
         className="sr-only"
       />
 
@@ -206,11 +254,11 @@ function PhotoPicker() {
             />
           </button>
           <p className="text-xs text-muted">
-            {t("photoHelp", { count: files.length })}
+            {t("photoHelp", { count: files.length, max: MAX_LISTING_PHOTOS })}
           </p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {previews.map((src, index) => (
-              <div key={src} className="relative">
+              <div key={`${files[index]?.name}-${index}`} className="relative">
                 <button
                   type="button"
                   onClick={() => setActive(index)}
@@ -232,6 +280,15 @@ function PhotoPicker() {
                 </button>
               </div>
             ))}
+            {canAdd ? (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="grid h-20 place-items-center rounded-xl border border-dashed border-forest/25 text-xs font-medium text-forest"
+              >
+                {t("addPhotos")}
+              </button>
+            ) : null}
           </div>
         </>
       ) : (

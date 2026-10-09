@@ -121,6 +121,11 @@ async function main() {
     `INSERT INTO users (legal_name, licence_number, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5)`,
     ["Meron Alemu", "AE-BOTH-001", "+251933444555", passwordHash, "BOTH"],
   );
+  await insertReturningId(
+    db,
+    `INSERT INTO users (legal_name, licence_number, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5)`,
+    ["House Clerk", "AE-ADMIN-001", "+251900000001", passwordHash, "ADMIN"],
+  );
 
   const seller = { id: sellerId };
   const buyer = { id: buyerId };
@@ -736,6 +741,7 @@ async function main() {
   console.log("Seller: AE-SELL-001 / Demo1234!");
   console.log("Buyer:  AE-BUY-001 / Demo1234!");
   console.log("Both:   AE-BOTH-001 / Demo1234!");
+  console.log("Admin:  AE-ADMIN-001 / Demo1234!");
 }
 
 main().catch((error) => {

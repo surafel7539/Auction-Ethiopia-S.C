@@ -1,6 +1,6 @@
 import { AuthScreen } from "@/components/AuthScreen";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Register",

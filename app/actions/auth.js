@@ -95,6 +95,9 @@ export async function loginAction(_, formData) {
   }
 
   await createSession(toUserDTO(user));
+  if (user.role === "ADMIN") {
+    redirect("/admin");
+  }
   redirect(next.startsWith("/") ? next : "/dashboard");
 }
 

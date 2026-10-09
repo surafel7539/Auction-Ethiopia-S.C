@@ -1,7 +1,5 @@
 "use server";
 
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser, canSell } from "@/lib/auth";
@@ -15,29 +13,14 @@ import {
   findListingById,
 } from "@/lib/models";
 import { isValidId } from "@/lib/serialize";
+import { saveListingImages } from "@/lib/storage";
 
 function clean(value) {
   return String(value || "").trim();
 }
 
 async function saveImages(files) {
-  const saved = [];
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-
-  for (const file of files.slice(0, 8)) {
-    if (!file || typeof file === "string" || !file.size) continue;
-    if (!file.type?.startsWith("image/")) continue;
-    if (file.size > 5 * 1024 * 1024) continue;
-
-    const ext = path.extname(file.name || "") || ".jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(uploadDir, filename), buffer);
-    saved.push(`/uploads/${filename}`);
-  }
-
-  return saved;
+  return saveListingImages(files);
 }
 
 export async function createListingAction(_, formData) {
@@ -58,6 +41,8 @@ export async function createListingAction(_, formData) {
   const condition = clean(formData.get("condition"));
   const location = clean(formData.get("location"));
   const durationHours = Number(formData.get("durationHours") || 72);
+  const scheduleEnabled = clean(formData.get("scheduleEnabled")) === "1";
+  const startsAtRaw = clean(formData.get("startsAt"));
   const files = formData.getAll("images");
   if (!files.some((file) => file && typeof file !== "string" && file.size)) {
     return formError("errPhotoRequired");
@@ -95,6 +80,16 @@ export async function createListingAction(_, formData) {
     return formError("errPhotoRequired");
   }
 
+  let startsAt = null;
+  let endsAt = new Date(Date.now() + durationHours * 60 * 60 * 1000);
+  if (scheduleEnabled) {
+    startsAt = new Date(startsAtRaw);
+    if (!startsAtRaw || Number.isNaN(startsAt.getTime()) || startsAt.getTime() <= Date.now()) {
+      return formError("errSchedule");
+    }
+    endsAt = new Date(startsAt.getTime() + durationHours * 60 * 60 * 1000);
+  }
+
   const category = await findCategoryById(categoryId);
   if (!category) {
     return formError("errCategoryMissing");
@@ -111,7 +106,8 @@ export async function createListingAction(_, formData) {
     condition,
     location,
     status: "LIVE",
-    endsAt: new Date(Date.now() + durationHours * 60 * 60 * 1000),
+    startsAt,
+    endsAt,
     categoryId,
     sellerId: user.id,
   });

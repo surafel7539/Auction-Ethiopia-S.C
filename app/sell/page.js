@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ListingForm } from "@/components/ListingForm";
-import { getCurrentUser, canSell } from "@/lib/auth";
+import { getCurrentUser, canSell, isAdmin } from "@/lib/auth";
 import { getLocale } from "@/lib/locale";
 import { getCategories } from "@/lib/listings";
 import { translate } from "@/lib/messages";
@@ -19,6 +20,9 @@ export default async function SellPage() {
   if (!user) {
     redirect("/login?next=/sell");
   }
+  if (isAdmin(user)) {
+    redirect("/admin");
+  }
 
   const categories = await getCategories();
 
@@ -32,9 +36,12 @@ export default async function SellPage() {
         {t("sellBody")}
       </p>
       {!canSell(user) ? (
-        <p className="mt-8 rounded-2xl border border-clay/30 bg-paper p-5 text-sm text-clay sm:p-6">
-          {t("buyerOnly")}
-        </p>
+        <div className="mt-8 rounded-2xl border border-clay/30 bg-paper p-5 text-sm text-clay sm:p-6">
+          <p>{t("buyerOnly")}</p>
+          <Link href="/register" className="mt-3 inline-block font-semibold text-forest">
+            {t("openSellerAccount")}
+          </Link>
+        </div>
       ) : (
         <div className="panel mt-8 rounded-[1.8rem] p-4 sm:p-6 md:p-8">
           <ListingForm categories={categories} />

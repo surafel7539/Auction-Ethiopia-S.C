@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const protectedPaths = ["/sell", "/dashboard"];
+const protectedPaths = ["/sell", "/dashboard", "/admin"];
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -31,5 +31,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ["/sell", "/sell/:path*", "/dashboard", "/dashboard/:path*"],
+  matcher: ["/sell", "/sell/:path*", "/dashboard", "/dashboard/:path*", "/admin", "/admin/:path*"],
 };

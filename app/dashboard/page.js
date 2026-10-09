@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { cancelListingAction } from "@/app/actions/listings";
 import { ListingCard } from "@/components/ListingCard";
-import { requireUser } from "@/lib/auth";
+import { requireUser, isAdmin } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { formatETB, getAuctionStatus, statusLabel } from "@/lib/format";
 import { getLocale } from "@/lib/locale";
 import { getDashboardData } from "@/lib/listings";
@@ -18,6 +19,9 @@ export default async function DashboardPage() {
   const locale = await getLocale();
   const t = (key, vars) => translate(locale, key, vars);
   const user = await requireUser("/login");
+  if (isAdmin(user)) {
+    redirect("/admin");
+  }
   const { listings, bids, watches } = await getDashboardData(user.id);
 
   const uniqueBids = [];

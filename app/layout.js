@@ -47,7 +47,7 @@ export async function generateMetadata() {
 export default async function RootLayout({ children }) {
   const locale = await getLocale();
   const user = await getCurrentUser();
-  const headerUser = user?.name ? { name: user.name } : null;
+  const headerUser = user?.name ? { name: user.name, role: user.role } : null;
   return (
     <html
       lang={locale}

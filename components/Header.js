@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { BrandMark } from "@/components/BrandMark";
@@ -8,34 +8,19 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useI18n } from "@/components/LocaleProvider";
 
-export function Header({ user: initialUser = null }) {
+export function Header({ user = null }) {
   const { t } = useI18n();
+  const admin = user?.role === "ADMIN";
+  const deskHref = admin ? "/admin" : "/dashboard";
   const links = [
     { href: "/auctions", label: t("auctions") },
     { href: "/categories", label: t("categories") },
     { href: "/suppliers", label: t("suppliers") },
-    { href: "/sell", label: t("sellLot") },
+    ...(admin
+      ? [{ href: "/admin", label: t("adminTitle") }]
+      : [{ href: "/sell", label: t("sellLot") }]),
   ];
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(initialUser);
-  const [ready, setReady] = useState(Boolean(initialUser));
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/me")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (cancelled || !data) return;
-        setUser(data.user || null);
-        setReady(true);
-      })
-      .catch(() => {
-        if (!cancelled) setReady(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   return (
     <header className="sticky top-0 z-40">
@@ -76,12 +61,10 @@ export function Header({ user: initialUser = null }) {
           </form>
 
           <div className="flex shrink-0 items-center gap-2 text-sm">
-            {!ready ? (
-              <span className="inline-block h-9 w-16" aria-hidden="true" />
-            ) : user ? (
+            {user ? (
               <>
                 <Link
-                  href="/dashboard"
+                  href={deskHref}
                   className="max-w-[7rem] truncate rounded-full px-2 py-2 text-blue hover:bg-blue/10 sm:max-w-28 sm:px-3"
                 >
                   {user.name.split(" ")[0]}
@@ -147,16 +130,15 @@ export function Header({ user: initialUser = null }) {
                 {link.label}
               </Link>
             ))}
-            {ready && user ? (
-              <Link href="/dashboard" className="rounded-2xl px-3 py-2" onClick={() => setOpen(false)}>
-                {t("dashboard")}
+            {user ? (
+              <Link href={deskHref} className="rounded-2xl px-3 py-2" onClick={() => setOpen(false)}>
+                {admin ? t("adminTitle") : t("dashboard")}
               </Link>
-            ) : null}
-            {ready && !user ? (
+            ) : (
               <Link href="/login" className="rounded-2xl px-3 py-2" onClick={() => setOpen(false)}>
                 {t("signIn")}
               </Link>
-            ) : null}
+            )}
           </nav>
         </div>
       ) : null}

@@ -167,9 +167,11 @@ export function AuthForm({ mode = "login", next = "/dashboard" }) {
       </p>
 
       {mode === "login" ? (
-        <p className="rounded-xl bg-gold-soft/40 px-3 py-2 text-xs text-heading">
-          {t("demoBuyer")}
-        </p>
+        <div className="space-y-1 rounded-xl bg-gold-soft/40 px-3 py-2 text-xs text-heading">
+          <p>{t("demoBuyer")}</p>
+          <p>{t("demoSeller")}</p>
+          <p>{t("demoAdmin")}</p>
+        </div>
       ) : null}
     </form>
   );
