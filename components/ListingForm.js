@@ -11,6 +11,7 @@ export function ListingForm({ categories }) {
   const { locale, t } = useI18n();
   const [state, action, pending] = useActionState(createListingAction, {});
   const [schedule, setSchedule] = useState(false);
+  const [description, setDescription] = useState("");
 
   return (
     <form action={action} className="space-y-5">
@@ -26,10 +27,16 @@ export function ListingForm({ categories }) {
         <textarea
           name="description"
           required
+          minLength={20}
           rows={6}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
           placeholder={t("descriptionPlaceholder")}
           className="w-full rounded-xl border border-forest/15 px-3 py-2"
         />
+        <span className="block text-xs text-muted">
+          {description.trim().length}/20
+        </span>
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("category")}>
@@ -229,7 +236,6 @@ function PhotoPicker() {
         name="images"
         accept="image/*"
         multiple
-        required
         onChange={(event) => {
           const picked = Array.from(event.target.files || []);
           event.target.value = "";

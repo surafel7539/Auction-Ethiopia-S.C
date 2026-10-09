@@ -16,7 +16,7 @@ import { isValidId } from "@/lib/serialize";
 import { saveListingImages } from "@/lib/storage";
 
 function clean(value) {
-  return String(value || "").trim();
+  return typeof value === "string" ? value.trim() : "";
 }
 
 async function saveImages(files) {
@@ -44,6 +44,13 @@ export async function createListingAction(_, formData) {
   const scheduleEnabled = clean(formData.get("scheduleEnabled")) === "1";
   const startsAtRaw = clean(formData.get("startsAt"));
   const files = formData.getAll("images");
+
+  if (title.length < 4) {
+    return formError("errTitle");
+  }
+  if (description.length < 20) {
+    return formError("errDescription", { count: description.length });
+  }
   if (!files.some((file) => file && typeof file !== "string" && file.size)) {
     return formError("errPhotoRequired");
   }
@@ -51,13 +58,6 @@ export async function createListingAction(_, formData) {
     return formError("errPhotoSize");
   }
   const images = await saveImages(files);
-
-  if (title.length < 4) {
-    return formError("errTitle");
-  }
-  if (description.length < 20) {
-    return formError("errDescription");
-  }
   if (!categoryId || !isValidId(categoryId)) {
     return formError("errChooseCategory");
   }
@@ -77,7 +77,7 @@ export async function createListingAction(_, formData) {
     return formError("errDuration");
   }
   if (!images.length) {
-    return formError("errPhotoRequired");
+    return formError("errPhotoSave");
   }
 
   let startsAt = null;
