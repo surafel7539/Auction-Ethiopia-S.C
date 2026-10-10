@@ -11,9 +11,8 @@ export async function Footer() {
       <div className="flag-bar" />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <Link href="/" className="flex items-center gap-3">
-            <BrandMark className="h-12 w-12" />
-            <p className="display text-3xl">Crown Bid</p>
+          <Link href="/" className="inline-flex items-center" aria-label="Crown Bid">
+            <BrandMark className="h-12 w-auto sm:h-14" variant="dark" />
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-7 text-on/75">
             {t("footerAbout")}

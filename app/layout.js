@@ -38,8 +38,8 @@ export async function generateMetadata() {
     },
     description: translate(locale, "metaDescription"),
     icons: {
-      icon: "/royalbid-gold.jpg",
-      apple: "/royalbid-gold.jpg",
+      icon: "/crownbid-full.png",
+      apple: "/crownbid-full.png",
     },
   };
 }

@@ -27,16 +27,8 @@ export function Header({ user = null }) {
       <div className="flag-bar" />
       <div className="px-3 pt-3 sm:px-4">
         <div className="panel mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full px-3 py-2 sm:px-4">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            <BrandMark className="h-10 w-10" />
-            <span className="min-w-0 leading-tight">
-              <span className="block truncate display text-lg text-heading">
-                Crown Bid
-              </span>
-              <span className="block text-[10px] uppercase tracking-[0.2em] text-yellow">
-                {t("shareCompany")}
-              </span>
-            </span>
+          <Link href="/" className="flex min-w-0 items-center" aria-label="Crown Bid">
+            <BrandMark className="h-12 w-auto sm:h-14" />
           </Link>
 
           <nav className="hidden items-center gap-1 text-sm font-medium text-blue lg:flex">
